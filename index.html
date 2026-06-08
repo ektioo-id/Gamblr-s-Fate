@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gambler's Fate: Crimson Glass Ultra</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&display=swap');
+
+        :root {
+            --glass-bg: rgba(10, 15, 30, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-dim: #64748b;
+            --gold: #ffb703;
+            --cyan: #00f0ff;
+            --diamond: #00f0ff;
+            --red: #ef4444;
+            --purple: #a855f7;
+            --dark-bg: #030712;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f172a, #1e1b4b, #2e1065);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+            padding: 20px 0;
+            transition: background 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* Ambient Dynamic Background Blobs */
+        .bg-blobs {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0;
+            filter: blur(90px);
+            opacity: 0.35;
+            pointer-events: none;
+        }
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            animation: moveBlob 15s infinite alternate ease-in-out;
+        }
+        .blob-1 { width: 350px; height: 350px; background: #311042; top: 10%; left: 15%; }
+        .blob-2 { width: 450px; height: 450px; background: #6b0f1a; bottom: 5%; right: 10%; animation-delay: -4s; }
+        .blob-3 { width: 280px; height: 280px; background: #0f4c5c; bottom: 40%; left: 40%; animation-delay: -7s; }
+
+        @keyframes moveBlob {
+            0% { transform: scale(1) translate(0, 0); }
+            100% { transform: scale(1.25) translate(30px, -30px); }
+        }
+
+        .flash-red { animation: dangerFlash 0.4s ease-out; }
+        @keyframes dangerFlash {
+            0% { box-shadow: inset 0 0 100px rgba(239, 68, 68, 0.8); }
+            100% { box-shadow: inset 0 0 0px rgba(239, 68, 68, 0); }
+        }
+
+        /* Container Liquid Glass */
+        .game-container {
+            position: relative;
+            z-index: 10;
+            width: 92%;
+            max-width: 580px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            padding: 2rem;
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+
+        /* Header Stats Layout */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 1rem;
+        }
+        .stat-item { display: flex; flex-direction: column; }
+        .stat-label { font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; }
+        .stat-value { font-size: 1.4rem; font-weight: 900; }
+        .text-gold { color: var(--gold); text-shadow: 0 0 10px rgba(255,183,3,0.3); }
+        .text-diamond { color: #00f0ff; text-shadow: 0 0 10px rgba(0,240,255,0.3); }
+
+        /* Strike Badge Animation */
+        .strike-container {
+            grid-column: span 2;
+            display: flex;
+            justify-content: center;
+            margin: 5px 0;
+            min-height: 35px;
+        }
+        .strike-badge {
+            background: linear-gradient(135deg, #ff0055, #4d00ff);
+            padding: 6px 22px;
+            border-radius: 30px;
+            font-size: 0.95rem;
+            font-weight: 900;
+            letter-spacing: 1.5px;
+            box-shadow: 0 0 25px rgba(77, 0, 255, 0.7), inset 0 1px 1px rgba(255,255,255,0.5);
+            display: none;
+            border: 1px solid rgba(255,255,255,0.3);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+        }
+        .strike-pop { 
+            display: block !important;
+            animation: ultraStrike 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; 
+        }
+        @keyframes ultraStrike {
+            0% { transform: scale(0.2) cubic-bezier(0.1, 1, 0.1, 1); opacity: 0; filter: saturate(0); }
+            50% { transform: scale(1.25) rotate(-3deg); filter: saturate(1.5) brightness(1.3); }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        /* Liquid Timer Bar */
+        .timer-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            position: relative;
+        }
+        .timer-bar {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #00f0ff, var(--purple));
+            border-radius: 10px;
+            transition: width 1s linear, background 0.3s;
+        }
+        .timer-urgent {
+            background: linear-gradient(90deg, var(--red), #f97316) !important;
+            animation: pulseTimer 0.2s infinite alternate;
+        }
+        @keyframes pulseTimer { 0% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        /* Messaging Area */
+        .message-area {
+            min-height: 65px;
+            margin-bottom: 1.5rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            text-align: center;
+        }
+        .sub-message { font-size: 0.85rem; color: var(--text-dim); margin-top: 6px; font-weight: 300; letter-spacing: 0.5px; }
+
+        /* Boxes Grid */
+        .boxes-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Box Design & Suspense Emojis */
+        .box {
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 20px;
+            height: 130px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+            position: relative;
+            box-shadow: inset 0 4px 10px rgba(0,0,0,0.4);
+        }
+        .box .mystery-emoji {
+            font-size: 2.2rem;
+            opacity: 0.65;
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+        }
+        .box:not(.opened):hover {
+            transform: translateY(-4px);
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.03) 100%);
+            border-color: rgba(255,255,255,0.2);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.2);
+        }
+        .box:not(.opened):hover .mystery-emoji { transform: scale(1.15); opacity: 1; }
+        .box.opened { cursor: default; transform: scale(0.96); }
+        .box.opened .mystery-emoji { display: none; }
+
+        /* AI Clue Mechanical Shimmer Effect */
+        .box.clue-active {
+            border-color: var(--purple) !important;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.6), inset 0 0 12px rgba(168, 85, 247, 0.3) !important;
+            animation: clueShimmer 0.8s infinite alternate ease-in-out;
+        }
+        @keyframes clueShimmer {
+            0% { border-color: #a855f7; box-shadow: 0 0 15px rgba(168, 85, 247, 0.5); }
+            100% { border-color: #00f0ff; box-shadow: 0 0 25px rgba(0, 240, 255, 0.9); }
+        }
+
+        /* Reveal Contents */
+        .box .content {
+            opacity: 0;
+            transform: translateY(10px) scale(0.8);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-weight: 700;
+        }
+        .box.opened .content { opacity: 1; transform: translateY(0) scale(1); }
+        .val-text { font-size: 1.1rem; margin-top: 6px; letter-spacing: 0.5px; }
+
+        /* Result State Variants */
+        .box.win-big { background: rgba(255, 183, 3, 0.12); border-color: var(--gold); box-shadow: 0 0 25px rgba(255, 183, 3, 0.3); animation: bounceWin 0.5s ease; color: var(--gold); }
+        .box.win-med { background: rgba(6, 182, 212, 0.1); border-color: #00f0ff; color: #00f0ff; }
+        .box.win-low { background: rgba(248, 250, 252, 0.05); border-color: var(--text-dim); color: var(--text-main); }
+        .box.win-diamond { background: rgba(0, 240, 255, 0.15); border-color: #00f0ff; box-shadow: 0 0 25px rgba(0, 240, 255, 0.3); color: #00f0ff; animation: bounceWin 0.5s ease; }
+        .box.zonk { background: rgba(239, 68, 68, 0.15); border-color: var(--red); box-shadow: 0 0 25px rgba(239, 68, 68, 0.3); animation: intenseShake 0.4s ease; color: var(--red); }
+        .box.unpicked { opacity: 0.35; filter: blur(1px) grayscale(50%); }
+
+        /* Action & Strategy Buttons */
+        .btn-group { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        .btn {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 14px 28px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: none;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .btn.primary { background: linear-gradient(135deg, rgba(255,183,3,0.2), rgba(255,183,3,0.05)); border-color: var(--gold); color: var(--gold); }
+        .btn.primary:hover { background: linear-gradient(135deg, rgba(255,183,3,0.3), rgba(255,183,3,0.1)); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,183,3,0.25); }
+        
+        /* AI Clue Button */
+        .btn.clue-action {
+            display: block;
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(0, 240, 255, 0.05));
+            border-color: var(--purple);
+            color: #bbf7d0;
+        }
+        .btn.clue-action:hover:not(:disabled) {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(0, 240, 255, 0.1));
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+            transform: translateY(-1px);
+        }
+        .btn.clue-action:disabled {
+            opacity: 0.35; cursor: not-allowed; border-color: var(--glass-border); color: var(--text-dim);
+        }
+
+        .btn.secondary { display: block; background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.05); color: var(--text-dim); }
+        .btn.secondary:hover { color: white; background: rgba(255,255,255,0.08); }
+
+        /* History Panel */
+        .history-panel {
+            margin-top: 1.5rem;
+            border-top: 1px solid var(--glass-border);
+            padding-top: 1rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out;
+            text-align: left;
+        }
+        .history-panel.open { max-height: 200px; overflow-y: auto; }
+        .history-title { font-size: 0.8rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; font-weight: 700; }
+        .history-list { display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; }
+        .history-item { 
+            background: rgba(255,255,255,0.02); padding: 8px 12px; border-radius: 10px; border-left: 3px solid var(--text-dim);
+            display: flex; justify-content: space-between;
+        }
+        .history-item.win { border-left-color: var(--gold); }
+        .history-item.bonus { border-left-color: var(--purple); background: rgba(168, 85, 247, 0.05); }
+        .history-item.lose { border-left-color: var(--red); }
+
+        /* Audio Top Controls Settings */
+        .top-controls {
+            width: 92%; max-width: 580px; display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 12px; z-index: 10;
+        }
+        .audio-btn {
+            background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border); color: var(--text-dim);
+            padding: 8px 14px; border-radius: 12px; cursor: pointer; font-size: 0.78rem; backdrop-filter: blur(5px);
+            display: flex; align-items: center; gap: 6px; transition: all 0.3s; font-weight: 500;
+        }
+        .audio-btn.active { color: #00f0ff; border-color: rgba(0,240,255,0.3); background: rgba(0,240,255,0.05); }
+
+        /* Shimmer Background Celebrations */
+        @keyframes jackpotShimmer {
+            0% { filter: hue-rotate(0deg) brightness(1); }
+            50% { filter: hue-rotate(45deg) brightness(1.3); }
+            100% { filter: hue-rotate(0deg) brightness(1); }
+        }
+        .jackpot-bg-active { animation: jackpotShimmer 2s infinite ease-in-out; }
+
+        @keyframes intenseShake {
+            0%, 100% { transform: translateX(0); }
+            15%, 55%, 85% { transform: translateX(-8px) rotate(-3deg); }
+            35%, 75% { transform: translateX(8px) rotate(3deg); }
+        }
+        @keyframes bounceWin { 0%, 100% { transform: scale(0.96); } 50% { transform: scale(1.06); } }
+    </style>
+</head>
+<body>
+
+    <div class="top-controls">
+        <button class="audio-btn" id="bgm-btn" onclick="toggleBgm()">🎵 BGM: OFF</button>
+        <button class="audio-btn" id="sfx-btn" onclick="toggleSfx()">🔊 SFX: OFF</button>
+    </div>
+
+    <div class="bg-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="game-container" id="gameUI">
+        <div class="stats-bar">
+            <div class="stat-item">
+                <span class="stat-label">Level</span>
+                <span class="stat-value" id="ui-level">1</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Stage</span>
+                <span class="stat-value" id="ui-stage">1/5</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Total Koin</span>
+                <span class="stat-value text-gold" id="ui-coins">🪙 0</span>
+            </div>
+            <div class="stat-item" style="align-items: flex-end;">
+                <span class="stat-label">Total Diamond</span>
+                <span class="stat-value text-diamond" id="ui-diamonds">💎 0</span>
+            </div>
+            <div class="strike-container">
+                <div id="ui-strike" class="strike-badge">0 STRIKE</div>
+            </div>
+        </div>
+
+        <div class="timer-container">
+            <div class="timer-bar" id="ui-timer"></div>
+        </div>
+
+        <div class="message-area" id="ui-message">
+            <div>Selamat Datang di Gambler's Fate</div>
+            <div class="sub-message">Tekan tombol 'Mulai Permainan' di bawah untuk memulai pencarian keberuntungan.</div>
+        </div>
+
+        <div class="boxes-grid" id="boxes-container"></div>
+
+        <div class="btn-group">
+            <button class="btn primary" id="start-btn" style="display: block;" onclick="startGameManual()">Mulai Permainan</button>
+            <button class="btn" id="action-btn" onclick="nextAction()">Lanjut</button>
+            <button class="btn clue-action" id="clue-btn" disabled onclick="buyAiClue()">🤖 AI Clue (🪙600)</button>
+            <button class="btn secondary" onclick="toggleHistory()">📜 History</button>
+        </div>
+
+        <div class="history-panel" id="history-panel">
+            <div class="history-title">History Progress Permainan</div>
+            <div class="history-list" id="history-list">
+                <div style="color: var(--text-dim); font-style: italic; font-size: 0.8rem;">Belum ada history permainan...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game Settings & Base State (Start from 0)
+        let coins = 0;
+        let diamonds = 0;
+        let level = 1;
+        let stage = 1;
+        let strikeCount = 0;
+        let currentBoxes = [];
+        let isClickable = false; 
+        let isGameOver = false;
+        let gameManualStarted = false; 
+        let clueUsedInStage = false;
+        let historyData = [];
+
+        let timeLeft = 15;
+        let timerInterval = null;
+
+        // Kumpulan Eksklusif Emoji Ekspresi Wajah Saja (Highly Random)
+        const mysteryEmojis = [
+            '😀', '😁', '😂', '🤣', '😃', '😄', '😅', '😆', '😉', '😊', 
+            '😋', '😎', '😍', '😘', '😗', '😙', '😚', '🙂', '🤗', '🤩', 
+            '🤔', '🤨', '😐', '😑', '😶', '🙄', '😏', '😣', '😥', '😮', 
+            '🤐', '😯', '😪', '😫', '🥱', '😴', '😌', '😛', '😜', '😝', 
+            '🤤', '😒', '😓', '😔', '😕', '🙃', '🤑', '😲', '🙁', '😖', 
+            '😞', '😟', '😤', '😢', '😭', '🤯', '😬', '😰', '😱', '🥵', 
+            '🥶', '😳', '🤪', '😵', '🥴', '🥺', '🤫', '🤭', '🧐', '🤓'
+        ];
+        
+        // Random Elegant Palettes
+        const elegantBgPalettes = [
+            'linear-gradient(135deg, #0f172a, #1e1b4b, #2e1065)', 
+            'linear-gradient(135deg, #022c22, #064e3b, #0f172a)', 
+            'linear-gradient(135deg, #0f172a, #0c4a6e, #0284c7)', 
+            'linear-gradient(135deg, #1c1917, #451a03, #0c0a09)', 
+            'linear-gradient(135deg, #311042, #1f0733, #0a0112)'  
+        ];
+
+        // DOM Elements
+        const uiLevel = document.getElementById('ui-level');
+        const uiStage = document.getElementById('ui-stage');
+        const uiCoins = document.getElementById('ui-coins');
+        const uiDiamonds = document.getElementById('ui-diamonds');
+        const uiStrike = document.getElementById('ui-strike');
+        const uiMessage = document.getElementById('ui-message');
+        const uiTimer = document.getElementById('ui-timer');
+        const boxesContainer = document.getElementById('boxes-container');
+        const actionBtn = document.getElementById('action-btn');
+        const startBtn = document.getElementById('start-btn');
+        const clueBtn = document.getElementById('clue-btn');
+        const historyList = document.getElementById('history-list');
+        const historyPanel = document.getElementById('history-panel');
+
+        // Split Audio Config
+        let audioCtx = null;
+        let musicInterval = null;
+        let isBgmPlaying = false;
+        let isSfxEnabled = false;
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        // Retro Chill Ambient Music Loop
+        function toggleBgm() {
+            initAudio();
+            const btn = document.getElementById('bgm-btn');
+            if (!isBgmPlaying) {
+                isBgmPlaying = true;
+                btn.innerText = "🎵 BGM: ON";
+                btn.classList.add('active');
+                
+                let step = 0;
+                const chillMelody = [196.00, 220.00, 261.63, 293.66, 329.63, 293.66, 261.63, 220.00]; 
+                musicInterval = setInterval(() => {
+                    if(!isBgmPlaying) return;
+                    let freq = chillMelody[step % chillMelody.length];
+                    playSynthTone(freq, 'triangle', 0.4, 0.08);
+                    if(step % 4 === 0) {
+                        playSynthTone(freq / 2, 'sine', 0.6, 0.12); 
+                    }
+                    step++;
+                }, 550); 
+            } else {
+                isBgmPlaying = false;
+                btn.innerText = "🎵 BGM: OFF";
+                btn.classList.remove('active');
+                clearInterval(musicInterval);
+            }
+        }
+
+        function toggleSfx() {
+            initAudio();
+            const btn = document.getElementById('sfx-btn');
+            isSfxEnabled = !isSfxEnabled;
+            if (isSfxEnabled) {
+                btn.innerText = "🔊 SFX: ON";
+                btn.classList.add('active');
+            } else {
+                btn.innerText = "🔊 SFX: OFF";
+                btn.classList.remove('active');
+            }
+        }
+
+        function playSynthTone(freq, type, duration, vol) {
+            if (!audioCtx) return;
+            try {
+                let osc = audioCtx.createOscillator();
+                let gainNode = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(vol, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e){}
+        }
+
+        function triggerSfxSound(type) {
+            if (!isSfxEnabled || !audioCtx) return;
+            if (type === 'win') {
+                playSynthTone(523.25, 'sine', 0.1, 0.1);
+                setTimeout(() => playSynthTone(659.25, 'sine', 0.1, 0.1), 80);
+            } else if (type === 'jackpot') {
+                playSynthTone(587.33, 'square', 0.08, 0.08);
+                setTimeout(() => playSynthTone(783.99, 'square', 0.08, 0.08), 70);
+                setTimeout(() => playSynthTone(1046.50, 'square', 0.3, 0.1), 140);
+            } else if (type === 'lose') {
+                playSynthTone(180, 'sawtooth', 0.3, 0.15);
+                setTimeout(() => playSynthTone(110, 'sawtooth', 0.4, 0.15), 150);
+            } else if (type === 'click') {
+                playSynthTone(440, 'triangle', 0.05, 0.08);
+            }
+        }
+
+        function startGameManual() {
+            triggerSfxSound('click');
+            gameManualStarted = true;
+            isClickable = true;
+            startBtn.style.display = 'none';
+            uiMessage.innerHTML = `<div>Pilih satu kotak sekarang!</div><div class="sub-message">Fokus... Analisis emojinya, tentukan pilihan teraman.</div>`;
+            updateClueButtonState();
+            startTimer();
+        }
+
+        function initGame() {
+            coins = 0;
+            diamonds = 0;
+            level = 1;
+            stage = 1;
+            strikeCount = 0;
+            isGameOver = false;
+            gameManualStarted = false;
+            uiStrike.className = "strike-badge";
+            
+            document.body.style.background = elegantBgPalettes[0];
+            document.body.classList.remove('jackpot-bg-active');
+
+            updateStats();
+            generateStage();
+        }
+
+        function updateStats() {
+            uiLevel.innerText = level;
+            uiStage.innerText = (stage === 'BONUS') ? 'BONUS' : `${stage}/5`;
+            uiCoins.innerText = `🪙 ${coins}`;
+            uiDiamonds.innerText = `💎 ${diamonds}`;
+            updateClueButtonState();
+        }
+
+        function updateClueButtonState() {
+            if (coins >= 600 && gameManualStarted && !clueUsedInStage && !isGameOver && isClickable) {
+                clueBtn.disabled = false;
+            } else {
+                clueBtn.disabled = true;
+            }
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timeLeft = 15;
+            uiTimer.style.width = '100%';
+            uiTimer.classList.remove('timer-urgent');
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                uiTimer.style.width = `${(timeLeft / 15) * 100}%`;
+                if(timeLeft <= 5) {
+                    uiTimer.classList.add('timer-urgent');
+                    if(isSfxEnabled) playSynthTone(290, 'triangle', 0.03, 0.06);
+                }
+                if(timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    handleTimeout();
+                }
+            }, 1000);
+        }
+
+        function handleTimeout() {
+            isClickable = false;
+            isGameOver = true;
+            strikeCount = 0;
+            uiStrike.className = "strike-badge";
+            triggerSfxSound('lose');
+
+            document.body.style.background = 'linear-gradient(135deg, #2d0510, #0a0003, #000000)';
+            document.body.classList.remove('jackpot-bg-active');
+
+            uiMessage.innerHTML = `<div style="color: var(--red);">WAKTU HABIS! Terlalu lama menganalisis resiko.</div>`;
+            logHistory(level, stage, "Waktu Habis (Kalah)", false, true);
+            revealAllBoxes(-1);
+            showButton("Ulang Dari Awal", false);
+        }
+
+        function generateStage() {
+            clueUsedInStage = false;
+            document.body.classList.remove('jackpot-bg-active');
+
+            if (!isGameOver && gameManualStarted) {
+                applyLevelBackground();
+            }
+
+            boxesContainer.innerHTML = '';
+            actionBtn.style.display = 'none';
+
+            let titleMsg = `Pilih kotak penyamaran!`;
+            let subMsg = `Pilih kotak secara bijak, awasi jebakan Zonk.`;
+            let numZonk = 0;
+            let isBonus = (stage === 'BONUS');
+
+            // Logika Distribusi Zonk Fleksibel
+            if (isBonus) {
+                titleMsg = `✨ STAGE BONUS ✨`;
+                subMsg = `Bebas dari resiko Zonk, kumpulkan keuntungan koin!`;
+                numZonk = 0;
+            } else if (level === 1) {
+                if (stage === 1) {
+                    titleMsg = `Langkah Pertama (Aman)`;
+                    subMsg = `Tahap awal pengumpulan dana. Seluruh kotak dijamin berisi koin!`;
+                    numZonk = 0; // Level 1 Stage 1 selalu aman
+                } else {
+                    numZonk = 1; // Level 1 Stage 2 sampai 5 pasti berisi tepat 1 Zonk
+                }
+            } else {
+                // Level 2 ke atas: Acak dinamis antara 1 Zonk atau maksimal 2 Zonk
+                numZonk = Math.random() < 0.5 ? 1 : 2;
+            }
+
+            if (!gameManualStarted) {
+                titleMsg = `Selamat Datang di Gambler's Fate`;
+                subMsg = `Tekan tombol 'Mulai Permainan' di bawah untuk memulai pencarian keberuntungan.`;
+                startBtn.style.display = 'block';
+                isClickable = false;
+            } else {
+                isClickable = true;
+                startBtn.style.display = 'none';
+            }
+
+            uiMessage.innerHTML = `<div>${titleMsg}</div><div class="sub-message">${subMsg}</div>`;
+            currentBoxes = [];
+
+            // Memasukkan Zonk ke Grid
+            for(let i = 0; i < numZonk; i++) {
+                currentBoxes.push({ type: 'zonk', value: 0 });
+            }
+
+            // Memasukkan Drop Hadiah (Koin Beragam Ukuran & Diamond)
+            let remaining = 4 - numZonk;
+            for(let i = 0; i < remaining; i++) {
+                let chance = Math.random();
+                
+                if (level >= 3 && Math.random() < 0.3) {
+                    let dVal = Math.floor((Math.random() * 3 + 1) * (level - 1));
+                    currentBoxes.push({ type: 'diamond', value: dVal });
+                    continue;
+                }
+
+                if (isBonus) {
+                    currentBoxes.push(chance < 0.4 ? 
+                        { type: 'high', value: Math.floor((Math.random() * 250 + 200) * level) } : 
+                        { type: 'med', value: Math.floor((Math.random() * 100 + 80) * level) }
+                    );
+                } else {
+                    // Setiap stage normal kini memiliki peluang memunculkan Koin Besar secara acak
+                    if (chance < 0.25) {
+                        currentBoxes.push({ type: 'high', value: Math.floor((Math.random() * 200 + 160) * level) });
+                    } else if (chance < 0.65) {
+                        currentBoxes.push({ type: 'med', value: Math.floor((Math.random() * 60 + 40) * level) });
+                    } else {
+                        currentBoxes.push({ type: 'low', value: Math.floor((Math.random() * 25 + 10) * level) });
+                    }
+                }
+            }
+
+            // Acak Posisi Kotak & Peta Emoji Acak Baru
+            currentBoxes.sort(() => Math.random() - 0.5);
+            let currentEmojis = [...mysteryEmojis].sort(() => Math.random() - 0.5);
+
+            currentBoxes.forEach((boxData, index) => {
+                const boxEl = document.createElement('div');
+                boxEl.className = 'box';
+                boxEl.id = `box-node-${index}`;
+                boxEl.innerHTML = `
+                    <div class="mystery-emoji">${currentEmojis[index]}</div>
+                    <div class="content" id="content-${index}"></div>
+                `;
+                boxEl.onclick = () => handleBoxClick(index, boxEl);
+                boxesContainer.appendChild(boxEl);
+            });
+
+            if (gameManualStarted) {
+                startTimer();
+                updateClueButtonState();
+            }
+        }
+
+        // AI Clue System (45% Akurasi Penunjuk)
+        function buyAiClue() {
+            if (coins < 600 || clueUsedInStage || !isClickable || isGameOver) return;
+            
+            triggerSfxSound('click');
+            coins -= 600;
+            clueUsedInStage = true;
+            updateStats();
+
+            let targetIndex = 0;
+            let safeIndexes = [];
+            let zonkIndexes = [];
+
+            currentBoxes.forEach((box, idx) => {
+                if (box.type === 'zonk') zonkIndexes.push(idx);
+                else safeIndexes.push(idx);
+            });
+
+            if (Math.random() < 0.45) {
+                if (safeIndexes.length > 0) {
+                    targetIndex = safeIndexes[Math.floor(Math.random() * safeIndexes.length)];
+                } else {
+                    targetIndex = Math.floor(Math.random() * currentBoxes.length);
+                }
+            } else {
+                if (zonkIndexes.length > 0) {
+                    targetIndex = zonkIndexes[Math.floor(Math.random() * zonkIndexes.length)];
+                } else {
+                    targetIndex = safeIndexes[Math.floor(Math.random() * safeIndexes.length)];
+                }
+            }
+
+            const targetBoxEl = document.getElementById(`box-node-${targetIndex}`);
+            if (targetBoxEl) {
+                targetBoxEl.classList.add('clue-active');
+            }
+        }
+
+        function applyLevelBackground() {
+            let paletteIndex = (level - 1) % elegantBgPalettes.length;
+            document.body.style.background = elegantBgPalettes[paletteIndex];
+        }
+
+        function handleBoxClick(selectedIndex, boxEl) {
+            if (!isClickable) return;
+            isClickable = false;
+            clearInterval(timerInterval);
+
+            const boxData = currentBoxes[selectedIndex];
+            const contentEl = document.getElementById(`content-${selectedIndex}`);
+            boxEl.classList.add('opened');
+
+            if (boxData.type === 'zonk') {
+                strikeCount = 0;
+                uiStrike.className = "strike-badge";
+                triggerSfxSound('lose');
+                boxEl.classList.add('zonk');
+                contentEl.innerHTML = `☠️<div class="val-text">ZONK</div>`;
+                
+                document.body.style.background = 'linear-gradient(135deg, #3b020c, #0a0003, #000000)';
+                isGameOver = true;
+
+                uiMessage.innerHTML = `<div style="color: var(--red);">ZONK! Intuisi Anda terjebak jebakan.</div>`;
+                logHistory(level, stage, "☠️ Masuk Zonk", false);
+                revealAllBoxes(selectedIndex);
+                showButton("Ulang Dari Awal", false);
+            } else {
+                let rewardText = "";
+                let isJackpot = false;
+
+                if (boxData.type === 'diamond') {
+                    diamonds += boxData.value;
+                    boxEl.classList.add('win-diamond');
+                    contentEl.innerHTML = `💎<div class="val-text">+${boxData.value}</div>`;
+                    rewardText = `+${boxData.value} Diamond`;
+                    triggerSfxSound('jackpot');
+                    isJackpot = true; 
+                } else {
+                    coins += boxData.value;
+                    rewardText = `+${boxData.value} Koin`;
+                    if (boxData.type === 'high') {
+                        boxEl.classList.add('win-big');
+                        triggerSfxSound('jackpot');
+                        isJackpot = true;
+                    } else {
+                        boxEl.classList.add(boxData.type === 'med' ? 'win-med' : 'win-low');
+                        triggerSfxSound('win');
+                    }
+                    contentEl.innerHTML = `🪙<div class="val-text">+${boxData.value}</div>`;
+                }
+
+                if (isJackpot) {
+                    document.body.style.background = 'linear-gradient(135deg, #3b2300, #5c0263, #15003b)';
+                    document.body.classList.add('jackpot-bg-active');
+                    uiMessage.innerHTML = `<div style="color: var(--gold); text-shadow: 0 0 10px rgba(255,183,3,0.5)">KILAU KEBERUNTUNGAN! ${rewardText}!</div>`;
+                } else {
+                    uiMessage.innerHTML = `<div style="color: #00f0ff;">Berhasil Memilih! (${rewardText})</div>`;
+                }
+
+                if (stage !== 'BONUS' && !(level === 1 && stage === 1)) {
+                    strikeCount++;
+                    if (strikeCount >= 2) {
+                        uiStrike.innerText = `🔥 ${strikeCount}x WIN STRIKE`;
+                        uiStrike.className = "strike-badge interstate strike-pop";
+                    }
+                }
+
+                logHistory(level, stage, rewardText, stage === 'BONUS');
+                updateStats();
+                revealAllBoxes(selectedIndex);
+                showButton(stage === 'BONUS' ? "Selesaikan Bonus" : "Lanjutkan", true);
+            }
+            updateClueButtonState();
+        }
+
+        function revealAllBoxes(selectedIndex) {
+            const allBoxes = document.querySelectorAll('.box');
+            allBoxes.forEach((el, index) => {
+                if (index !== selectedIndex) {
+                    el.classList.add('opened', 'unpicked');
+                    const cEl = document.getElementById(`content-${index}`);
+                    const bData = currentBoxes[index];
+                    if (bData.type === 'zonk') {
+                        cEl.innerHTML = `☠️`;
+                    } else if (bData.type === 'diamond') {
+                        cEl.innerHTML = `💎<div class="val-text" style="font-size:0.75rem">+${bData.value}</div>`;
+                    } else {
+                        cEl.innerHTML = `🪙<div class="val-text" style="font-size:0.75rem">+${bData.value}</div>`;
+                    }
+                }
+            });
+        }
+
+        function showButton(text, isPrimary) {
+            actionBtn.innerText = text;
+            actionBtn.style.display = 'block';
+            actionBtn.className = isPrimary ? "btn primary" : "btn";
+        }
+
+        function nextAction() {
+            triggerSfxSound('click');
+            if (isGameOver) {
+                initGame();
+            } else {
+                if (stage === 'BONUS') {
+                    level++;
+                    stage = 1;
+                    
+                    let coinFee = level * 150;
+                    let diamondFee = 0;
+
+                    if (level >= 5) {
+                        coinFee = level * 210;
+                        diamondFee = (level - 4) * 5;
+                    }
+
+                    if (coins < coinFee || diamonds < diamondFee) {
+                        uiMessage.innerHTML = `<div style="color: var(--red);">ELIMINASI! Dana tidak mencukupi untuk tiket masuk Level ${level} (Butuh 🪙${coinFee} & 💎${diamondFee}).</div>`;
+                        isGameOver = true;
+                        boxesContainer.innerHTML = '';
+                        uiStrike.className = "strike-badge";
+                        document.body.style.background = 'linear-gradient(135deg, #1f0107, #000000, #0a0005)';
+                        showButton("Mulai Baru", false);
+                        return;
+                    } else {
+                        coins -= coinFee;
+                        diamonds -= diamondFee;
+                        alert(`🎟️ MEMASUKI LEVEL ${level}\nBiaya Progresif Terpotong:\n🪙 -${coinFee} Koin\n💎 -${diamondFee} Diamond`);
+                    }
+                } else {
+                    stage++;
+                    if (stage > 5) {
+                        stage = 'BONUS';
+                    }
+                }
+                updateStats();
+                generateStage();
+            }
+        }
+
+        function logHistory(lvl, stg, result, isBonusBar = false, isTimeout = false) {
+            let stageName = isBonusBar ? "Stage Bonus" : `Stg ${stg}`;
+            let statusClass = "win";
+            if (result.includes("Zonk") || isTimeout) statusClass = "lose";
+            if (isBonusBar) statusClass = "bonus";
+
+            historyData.unshift({
+                title: `Lvl ${lvl} - ${stageName}`,
+                res: result,
+                typeClass: statusClass
+            });
+            renderHistory();
+        }
+
+        function renderHistory() {
+            if (historyData.length === 0) return;
+            historyList.innerHTML = historyData.map(item => `
+                <div class="history-item ${item.typeClass}">
+                    <span><strong>${item.title}</strong></span>
+                    <span>${item.res}</span>
+                </div>
+            `).join('');
+        }
+
+        function toggleHistory() {
+            triggerSfxSound('click');
+            historyPanel.classList.toggle('open');
+        }
+
+        window.onload = () => {
+            initGame();
+        };
+    </script>
+</body>
+</html>
