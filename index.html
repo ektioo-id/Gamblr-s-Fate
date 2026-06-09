@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Gambler's Fate: Crimson Glass Ultra</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&display=swap');
@@ -17,6 +17,7 @@
             --diamond: #00f0ff;
             --red: #ef4444;
             --purple: #a855f7;
+            --emerald: #10b981;
             --dark-bg: #030712;
         }
 
@@ -26,6 +27,8 @@
             padding: 0;
             font-family: 'Outfit', sans-serif;
             user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
         }
 
         body {
@@ -34,11 +37,11 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
             overflow-x: hidden;
             position: relative;
-            padding: 20px 0;
+            padding: 15px 10px;
             transition: background 1.2s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
@@ -47,8 +50,8 @@
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             z-index: 0;
-            filter: blur(90px);
-            opacity: 0.35;
+            filter: blur(60px);
+            opacity: 0.3;
             pointer-events: none;
         }
         .blob {
@@ -56,296 +59,505 @@
             border-radius: 50%;
             animation: moveBlob 15s infinite alternate ease-in-out;
         }
-        .blob-1 { width: 350px; height: 350px; background: #311042; top: 10%; left: 15%; }
-        .blob-2 { width: 450px; height: 450px; background: #6b0f1a; bottom: 5%; right: 10%; animation-delay: -4s; }
-        .blob-3 { width: 280px; height: 280px; background: #0f4c5c; bottom: 40%; left: 40%; animation-delay: -7s; }
+        .blob-1 { width: 250px; height: 250px; background: #311042; top: 10%; left: 5%; }
+        .blob-2 { width: 300px; height: 300px; background: #6b0f1a; bottom: 5%; right: 5%; animation-delay: -4s; }
 
         @keyframes moveBlob {
             0% { transform: scale(1) translate(0, 0); }
-            100% { transform: scale(1.25) translate(30px, -30px); }
+            100% { transform: scale(1.2) translate(20px, -20px); }
         }
 
-        .flash-red { animation: dangerFlash 0.4s ease-out; }
-        @keyframes dangerFlash {
-            0% { box-shadow: inset 0 0 100px rgba(239, 68, 68, 0.8); }
-            100% { box-shadow: inset 0 0 0px rgba(239, 68, 68, 0); }
-        }
-
-        /* Container Liquid Glass */
-        .game-container {
-            position: relative;
-            z-index: 10;
-            width: 92%;
-            max-width: 580px;
+        /* Authentication System Styles */
+        .auth-container {
+            width: 100%;
+            max-width: 440px;
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
-            border-radius: 28px;
+            border-radius: 24px;
             padding: 2rem;
-            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255,255,255,0.1);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+            z-index: 20;
+            margin-top: 5vh;
+            display: none;
+        }
+        .auth-title {
+            font-size: 1.5rem;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(45deg, var(--gold), #00f0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+            font-weight: 700;
+        }
+        .form-control {
+            width: 100%;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--glass-border);
+            padding: 10px 14px;
+            border-radius: 12px;
+            color: white;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-control:focus {
+            border-color: #00f0ff;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .auth-toggle-text {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            text-align: center;
+            margin-top: 1rem;
+            cursor: pointer;
+        }
+        .auth-toggle-text span {
+            color: #00f0ff;
+            font-weight: 700;
         }
 
-        /* Header Stats Layout */
+        /* Top Controls Area - Integrated Layout */
+        .top-controls {
+            width: 100%;
+            max-width: 480px;
+            display: grid;
+            grid-template-columns: 1.2fr 1.2fr 1fr;
+            gap: 6px;
+            margin-bottom: 12px;
+            z-index: 10;
+            display: none; /* Shown after auth */
+        }
+        .audio-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--glass-border);
+            color: var(--text-dim);
+            padding: 10px 4px;
+            border-radius: 14px;
+            cursor: pointer;
+            font-size: 0.72rem;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            transition: all 0.3s;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .audio-btn.active { color: #00f0ff; border-color: rgba(0,240,255,0.3); background: rgba(0,240,255,0.05); }
+        .audio-btn.wallet-theme { color: var(--gold); border-color: rgba(255,183,3,0.3); background: rgba(255,183,3,0.05); font-weight: 700; }
+        .audio-btn.profile-theme { color: #e9d5ff; border-color: rgba(168,85,247,0.3); background: rgba(168,85,247,0.05); font-weight: 700; }
+
+        /* Responsive Main Container */
+        .game-container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 480px; 
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 1.5rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255,255,255,0.1);
+            display: none; /* Shown after auth */
+            flex-direction: column;
+        }
+
+        /* Stats Grid Layout */
         .stats-bar {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-bottom: 1rem;
+            gap: 10px;
+            margin-bottom: 0.8rem;
         }
         .stat-item { display: flex; flex-direction: column; }
-        .stat-label { font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; }
-        .stat-value { font-size: 1.4rem; font-weight: 900; }
-        .text-gold { color: var(--gold); text-shadow: 0 0 10px rgba(255,183,3,0.3); }
-        .text-diamond { color: #00f0ff; text-shadow: 0 0 10px rgba(0,240,255,0.3); }
+        .stat-label { font-size: 0.68rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+        .stat-value { font-size: 1.15rem; font-weight: 900; margin-top: 2px; }
+        .text-gold { color: var(--gold); text-shadow: 0 0 10px rgba(255,183,3,0.2); }
+        .text-diamond { color: #00f0ff; text-shadow: 0 0 10px rgba(0,240,255,0.2); }
+        .text-emerald { color: var(--emerald); text-shadow: 0 0 10px rgba(16,185,129,0.2); }
 
-        /* Strike Badge Animation */
         .strike-container {
             grid-column: span 2;
             display: flex;
             justify-content: center;
-            margin: 5px 0;
-            min-height: 35px;
+            margin: 4px 0;
+            min-height: 32px;
         }
         .strike-badge {
             background: linear-gradient(135deg, #ff0055, #4d00ff);
-            padding: 6px 22px;
+            padding: 5px 18px;
             border-radius: 30px;
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             font-weight: 900;
-            letter-spacing: 1.5px;
-            box-shadow: 0 0 25px rgba(77, 0, 255, 0.7), inset 0 1px 1px rgba(255,255,255,0.5);
+            letter-spacing: 1px;
+            box-shadow: 0 0 20px rgba(77, 0, 255, 0.6);
             display: none;
             border: 1px solid rgba(255,255,255,0.3);
-            text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+            text-shadow: 0 1px 3px rgba(0,0,0,0.6);
         }
         .strike-pop { 
             display: block !important;
-            animation: ultraStrike 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; 
+            animation: ultraStrike 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; 
         }
         @keyframes ultraStrike {
-            0% { transform: scale(0.2) cubic-bezier(0.1, 1, 0.1, 1); opacity: 0; filter: saturate(0); }
-            50% { transform: scale(1.25) rotate(-3deg); filter: saturate(1.5) brightness(1.3); }
-            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+            0% { transform: scale(0.4); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
         }
 
-        /* Liquid Timer Bar */
+        /* Timer Loading Bar */
         .timer-container {
             width: 100%;
-            height: 6px;
+            height: 5px;
             background: rgba(255,255,255,0.05);
             border-radius: 10px;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.2rem;
             overflow: hidden;
-            position: relative;
         }
         .timer-bar {
             height: 100%;
             width: 100%;
             background: linear-gradient(90deg, #00f0ff, var(--purple));
-            border-radius: 10px;
-            transition: width 1s linear, background 0.3s;
+            transition: width 1s linear;
         }
-        .timer-urgent {
-            background: linear-gradient(90deg, var(--red), #f97316) !important;
-            animation: pulseTimer 0.2s infinite alternate;
-        }
-        @keyframes pulseTimer { 0% { opacity: 0.5; } 100% { opacity: 1; } }
 
-        /* Messaging Area */
+        /* Message Console Area */
         .message-area {
-            min-height: 65px;
-            margin-bottom: 1.5rem;
-            font-size: 1.25rem;
+            min-height: 58px;
+            margin-bottom: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 700;
             text-align: center;
+            line-height: 1.3;
         }
-        .sub-message { font-size: 0.85rem; color: var(--text-dim); margin-top: 6px; font-weight: 300; letter-spacing: 0.5px; }
+        .sub-message { font-size: 0.8rem; color: var(--text-dim); margin-top: 5px; font-weight: 300; }
 
-        /* Boxes Grid */
+        /* Boxes Grid Layout */
         .boxes-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 1.2rem;
-            margin-bottom: 1.5rem;
+            gap: 0.9rem;
+            margin-bottom: 1.2rem;
         }
 
-        /* Box Design & Suspense Emojis */
+        /* Box Architecture & Adaptive Heights */
         .box {
             background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
             border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 20px;
-            height: 130px;
+            border-radius: 18px;
+            height: 110px; 
             display: flex;
             justify-content: center;
             align-items: center;
             cursor: pointer;
-            transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
             position: relative;
-            box-shadow: inset 0 4px 10px rgba(0,0,0,0.4);
+            box-shadow: inset 0 4px 10px rgba(0,0,0,0.3);
         }
         .box .mystery-emoji {
-            font-size: 2.2rem;
-            opacity: 0.65;
-            transition: all 0.3s ease;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+            font-size: 2rem;
+            opacity: 0.7;
+            transition: all 0.25s ease;
         }
-        .box:not(.opened):hover {
-            transform: translateY(-4px);
-            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.03) 100%);
-            border-color: rgba(255,255,255,0.2);
-            box-shadow: 0 12px 24px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.2);
-        }
-        .box:not(.opened):hover .mystery-emoji { transform: scale(1.15); opacity: 1; }
         .box.opened { cursor: default; transform: scale(0.96); }
         .box.opened .mystery-emoji { display: none; }
 
-        /* AI Clue Mechanical Shimmer Effect */
+        /* Clue Shimmer Effect */
         .box.clue-active {
-            border-color: var(--purple) !important;
-            box-shadow: 0 0 20px rgba(168, 85, 247, 0.6), inset 0 0 12px rgba(168, 85, 247, 0.3) !important;
             animation: clueShimmer 0.8s infinite alternate ease-in-out;
         }
         @keyframes clueShimmer {
-            0% { border-color: #a855f7; box-shadow: 0 0 15px rgba(168, 85, 247, 0.5); }
-            100% { border-color: #00f0ff; box-shadow: 0 0 25px rgba(0, 240, 255, 0.9); }
+            0% { border-color: #a855f7; box-shadow: 0 0 12px rgba(168, 85, 247, 0.4); }
+            100% { border-color: #00f0ff; box-shadow: 0 0 20px rgba(0, 240, 255, 0.7); }
         }
 
-        /* Reveal Contents */
+        /* Result Unwrapping */
         .box .content {
             opacity: 0;
-            transform: translateY(10px) scale(0.8);
-            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform: translateY(10px) scale(0.85);
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
             display: flex;
             flex-direction: column;
             align-items: center;
             font-weight: 700;
         }
         .box.opened .content { opacity: 1; transform: translateY(0) scale(1); }
-        .val-text { font-size: 1.1rem; margin-top: 6px; letter-spacing: 0.5px; }
+        .val-text { font-size: 1rem; margin-top: 4px; }
 
-        /* Result State Variants */
-        .box.win-big { background: rgba(255, 183, 3, 0.12); border-color: var(--gold); box-shadow: 0 0 25px rgba(255, 183, 3, 0.3); animation: bounceWin 0.5s ease; color: var(--gold); }
+        /* Result State Skins */
+        .box.win-big { background: rgba(255, 183, 3, 0.12); border-color: var(--gold); box-shadow: 0 0 20px rgba(255, 183, 3, 0.25); color: var(--gold); }
         .box.win-med { background: rgba(6, 182, 212, 0.1); border-color: #00f0ff; color: #00f0ff; }
-        .box.win-low { background: rgba(248, 250, 252, 0.05); border-color: var(--text-dim); color: var(--text-main); }
-        .box.win-diamond { background: rgba(0, 240, 255, 0.15); border-color: #00f0ff; box-shadow: 0 0 25px rgba(0, 240, 255, 0.3); color: #00f0ff; animation: bounceWin 0.5s ease; }
-        .box.zonk { background: rgba(239, 68, 68, 0.15); border-color: var(--red); box-shadow: 0 0 25px rgba(239, 68, 68, 0.3); animation: intenseShake 0.4s ease; color: var(--red); }
-        .box.unpicked { opacity: 0.35; filter: blur(1px) grayscale(50%); }
+        .box.win-low { background: rgba(248, 250, 252, 0.04); border-color: var(--text-dim); color: var(--text-main); }
+        .box.win-diamond { background: rgba(0, 240, 255, 0.15); border-color: #00f0ff; box-shadow: 0 0 20px rgba(0, 240, 255, 0.25); color: #00f0ff; }
+        .box.zonk { background: rgba(239, 68, 68, 0.15); border-color: var(--red); box-shadow: 0 0 20px rgba(239, 68, 68, 0.25); animation: intenseShake 0.4s ease; color: var(--red); }
+        .box.unpicked { opacity: 0.3; filter: blur(0.5px) grayscale(40%); }
 
-        /* Action & Strategy Buttons */
-        .btn-group { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        /* Action Buttons */
+        .btn-group { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; width: 100%; }
         .btn {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.04);
             color: white;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 14px 28px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 12px 20px;
             border-radius: 50px;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.25s;
             display: none;
-            letter-spacing: 1px;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        .btn.primary { background: linear-gradient(135deg, rgba(255,183,3,0.2), rgba(255,183,3,0.05)); border-color: var(--gold); color: var(--gold); }
-        .btn.primary:hover { background: linear-gradient(135deg, rgba(255,183,3,0.3), rgba(255,183,3,0.1)); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,183,3,0.25); }
-        
-        /* AI Clue Button */
-        .btn.clue-action {
-            display: block;
-            background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(0, 240, 255, 0.05));
-            border-color: var(--purple);
-            color: #bbf7d0;
-        }
-        .btn.clue-action:hover:not(:disabled) {
-            background: linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(0, 240, 255, 0.1));
-            box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
-            transform: translateY(-1px);
-        }
-        .btn.clue-action:disabled {
-            opacity: 0.35; cursor: not-allowed; border-color: var(--glass-border); color: var(--text-dim);
-        }
+        .btn.primary { display: block; background: linear-gradient(135deg, rgba(255,183,3,0.2), rgba(255,183,3,0.05)); border-color: var(--gold); color: var(--gold); }
+        .btn.danger-action { background: linear-gradient(135deg, rgba(239,68,68,0.2), rgba(239,68,68,0.05)); border-color: var(--red); color: #fca5a5; }
+        .btn.clue-action { display: block; background: linear-gradient(135deg, rgba(168, 85, 247, 0.12), rgba(0, 240, 255, 0.04)); border-color: var(--purple); color: #e9d5ff; }
+        .btn.clue-action:disabled { opacity: 0.3; cursor: not-allowed; border-color: var(--glass-border); color: var(--text-dim); }
+        .btn.secondary { display: block; background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.04); color: var(--text-dim); }
 
-        .btn.secondary { display: block; background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.05); color: var(--text-dim); }
-        .btn.secondary:hover { color: white; background: rgba(255,255,255,0.08); }
-
-        /* History Panel */
+        /* History Run Log Grid */
         .history-panel {
-            margin-top: 1.5rem;
+            margin-top: 1.2rem;
             border-top: 1px solid var(--glass-border);
-            padding-top: 1rem;
+            padding-top: 0.8rem;
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.4s ease-out;
-            text-align: left;
         }
-        .history-panel.open { max-height: 200px; overflow-y: auto; }
-        .history-title { font-size: 0.8rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; font-weight: 700; }
-        .history-list { display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; }
+        .history-panel.open { max-height: 160px; overflow-y: auto; }
+        .history-title { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.4rem; font-weight: 700; }
+        .history-list { display: flex; flex-direction: column; gap: 5px; font-size: 0.8rem; }
         .history-item { 
-            background: rgba(255,255,255,0.02); padding: 8px 12px; border-radius: 10px; border-left: 3px solid var(--text-dim);
+            background: rgba(255,255,255,0.02); padding: 6px 10px; border-radius: 8px; border-left: 3px solid var(--text-dim);
             display: flex; justify-content: space-between;
         }
         .history-item.win { border-left-color: var(--gold); }
-        .history-item.bonus { border-left-color: var(--purple); background: rgba(168, 85, 247, 0.05); }
+        .history-item.bonus { border-left-color: var(--purple); background: rgba(168, 85, 247, 0.04); }
         .history-item.lose { border-left-color: var(--red); }
 
-        /* Audio Top Controls Settings */
-        .top-controls {
-            width: 92%; max-width: 580px; display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 12px; z-index: 10;
+        /* Modals Shared Architecture */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(3, 7, 18, 0.6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            z-index: 100; display: none; justify-content: center; align-items: center;
+            padding: 10px;
         }
-        .audio-btn {
-            background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border); color: var(--text-dim);
-            padding: 8px 14px; border-radius: 12px; cursor: pointer; font-size: 0.78rem; backdrop-filter: blur(5px);
-            display: flex; align-items: center; gap: 6px; transition: all 0.3s; font-weight: 500;
+        .modal-content {
+            background: rgba(15, 23, 42, 0.9); border: 1px solid var(--glass-border);
+            width: 100%; max-width: 440px; border-radius: 24px; padding: 1.5rem;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8); max-height: 85vh; overflow-y: auto;
         }
-        .audio-btn.active { color: #00f0ff; border-color: rgba(0,240,255,0.3); background: rgba(0,240,255,0.05); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .modal-title { font-size: 1.1rem; font-weight: 900; color: var(--gold); }
+        .close-modal { font-size: 1.4rem; color: var(--text-dim); cursor: pointer; }
+        
+        /* Unified Settings Components */
+        .setting-toggle-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 6px; border-bottom: 1px solid var(--glass-border);
+        }
+        .setting-toggle-row:last-child { border-bottom: none; }
+        .setting-info { display: flex; flex-direction: column; }
+        .setting-name { font-size: 0.95rem; font-weight: 700; }
+        .setting-desc { font-size: 0.72rem; color: var(--text-dim); }
 
-        /* Shimmer Background Celebrations */
+        /* Custom Audio Switch Element */
+        .switch-control {
+            position: relative; display: inline-block; width: 46px; height: 24px;
+        }
+        .switch-control input { opacity: 0; width: 0; height: 0; }
+        .slider-node {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(255,255,255,0.1); transition: .3s; border-radius: 24px;
+            border: 1px solid var(--glass-border);
+        }
+        .slider-node:before {
+            position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px;
+            background-color: var(--text-dim); transition: .3s; border-radius: 50%;
+        }
+        input:checked + .slider-node { background-color: rgba(0,240,255,0.15); border-color: #00f0ff; }
+        input:checked + .slider-node:before { transform: translateX(22px); background-color: #00f0ff; }
+
+        /* Wallet Modal Area */
+        .wallet-balances {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1.2rem;
+            background: rgba(255,255,255,0.02); padding: 10px; border-radius: 14px;
+        }
+        .wallet-tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--glass-border); margin-bottom: 1rem; }
+        .tab-btn {
+            background: none; border: none; color: var(--text-dim); font-size: 0.82rem; font-weight: 700;
+            padding: 6px 12px; cursor: pointer; border-bottom: 2px solid transparent;
+        }
+        .tab-btn.active { color: #00f0ff; border-bottom-color: #00f0ff; }
+        
+        .shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .shop-card {
+            background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 12px;
+            border-radius: 14px; text-align: center; display: flex; flex-direction: column; gap: 4px;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .shop-card .amount { font-size: 1rem; font-weight: 900; }
+        .shop-card .price { font-size: 0.78rem; font-weight: 700; color: var(--gold); background: rgba(255,183,3,0.1); padding: 2px 6px; border-radius: 12px; align-self: center; }
+
+        .wd-container { display: flex; flex-direction: column; gap: 10px; }
+        .wd-linked-info {
+            background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.2);
+            padding: 10px; border-radius: 12px; font-size: 0.8rem; line-height: 1.4;
+        }
+        .wd-calc { font-size: 0.78rem; color: var(--text-dim); font-style: italic; }
+
+        .fin-history-list { display: flex; flex-direction: column; gap: 5px; margin-top: 8px; max-height: 140px; overflow-y: auto; }
+        .fin-item {
+            font-size: 0.78rem; background: rgba(255,255,255,0.02); padding: 6px 10px; border-radius: 6px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        /* Profile Modal Elements */
+        .profile-badges {
+            display: flex; flex-direction: column; gap: 8px; margin-bottom: 1rem;
+        }
+        .p-badge-item {
+            background: rgba(0,0,0,0.2); padding: 10px 14px; border-radius: 12px;
+            display: flex; justify-content: space-between; font-size: 0.88rem;
+        }
+
+        /* Media Queries Optimization */
+        @media (min-width: 768px) {
+            body { justify-content: center; padding: 20px 0; }
+            .box:not(.opened):hover {
+                transform: translateY(-4px) scale(1.02);
+                background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.03) 100%);
+                border-color: rgba(255,255,255,0.2);
+                box-shadow: 0 12px 24px rgba(0,0,0,0.5);
+            }
+            .box:not(.opened):hover .mystery-emoji { transform: scale(1.1); opacity: 1; }
+            .btn:hover:not(:disabled) { filter: brightness(1.2); transform: translateY(-1px); }
+            .shop-card:hover { border-color: var(--gold); background: rgba(255,183,3,0.05); transform: translateY(-2px); }
+        }
+
+        @media (max-width: 360px) {
+            .stat-value { font-size: 1rem; }
+            .box { height: 95px; }
+        }
+
         @keyframes jackpotShimmer {
             0% { filter: hue-rotate(0deg) brightness(1); }
-            50% { filter: hue-rotate(45deg) brightness(1.3); }
+            50% { filter: hue-rotate(45deg) brightness(1.2); }
             100% { filter: hue-rotate(0deg) brightness(1); }
         }
         .jackpot-bg-active { animation: jackpotShimmer 2s infinite ease-in-out; }
-
         @keyframes intenseShake {
             0%, 100% { transform: translateX(0); }
-            15%, 55%, 85% { transform: translateX(-8px) rotate(-3deg); }
-            35%, 75% { transform: translateX(8px) rotate(3deg); }
+            20%, 60% { transform: translateX(-6px) rotate(-2deg); }
+            40%, 80% { transform: translateX(6px) rotate(2deg); }
         }
-        @keyframes bounceWin { 0%, 100% { transform: scale(0.96); } 50% { transform: scale(1.06); } }
     </style>
 </head>
 <body>
 
-    <div class="top-controls">
-        <button class="audio-btn" id="bgm-btn" onclick="toggleBgm()">🎵 BGM: OFF</button>
-        <button class="audio-btn" id="sfx-btn" onclick="toggleSfx()">🔊 SFX: OFF</button>
+    <!-- AUTHENTICATION FORM SCREEN -->
+    <div class="auth-container" id="authBox">
+        <div class="auth-title" id="authTitle">PENDAFTARAN AKUN BARU</div>
+        
+        <form id="authForm" onsubmit="handleAuthSubmit(event)">
+            <!-- Sign Up Exclusive Fields -->
+            <div class="form-group" id="group-fullname">
+                <label>Nama Lengkap</label>
+                <input type="text" class="form-control" id="auth-fullname" required placeholder="Masukkan nama lengkap...">
+            </div>
+            <div class="form-group" id="group-playerid">
+                <label>ID Pemain (Username)</label>
+                <input type="text" class="form-control" id="auth-playerid" required placeholder="Contoh: @kansamita">
+            </div>
+            
+            <div class="form-group">
+                <label>Alamat Email</label>
+                <input type="email" class="form-control" id="auth-email" required placeholder="nama@email.com">
+            </div>
+            <div class="form-group">
+                <label>Kata Sandi Baru</label>
+                <input type="password" class="form-control" id="auth-password" required placeholder="******">
+            </div>
+
+            <!-- Wallet Integrated System Setup -->
+            <div id="signup-wallet-section">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Pilih E-Wallet</label>
+                        <select class="form-control" id="auth-wallet-type" style="color: white;">
+                            <option value="DANA">💳 DANA</option>
+                            <option value="GoPay">💳 GoPay</option>
+                            <option value="OVO">💳 OVO</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Nama Akun Wallet</label>
+                        <input type="text" class="form-control" id="auth-wallet-name" placeholder="Nama terdaftar">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Nomor HP Wallet</label>
+                    <input type="tel" class="form-control" id="auth-wallet-phone" placeholder="08xxxxxxxxxx">
+                </div>
+            </div>
+
+            <button type="submit" class="btn primary" style="width: 100%; border-radius: 12px; margin-top: 10px;" id="authSubmitBtn">Daftar Akun & Masuk</button>
+        </form>
+
+        <div class="auth-toggle-text" id="authToggleMessage" onclick="toggleAuthMode()">
+            Sudah punya akun? <span>Masuk di sini</span>
+        </div>
+    </div>
+
+    <!-- MAIN GAME HEADER SYSTEM CONTROLS -->
+    <div class="top-controls" id="topControlsUI">
+        <button class="audio-btn profile-theme" onclick="toggleProfileModal(true)"><span id="nav-profile-name">👤 PROFIL</span></button>
+        <button class="audio-btn wallet-theme" onclick="toggleWalletModal(true)">💳 DOMPET</button>
+        <button class="audio-btn" onclick="toggleSettingsModal(true)">🛠️ SETTING</button>
     </div>
 
     <div class="bg-blobs">
         <div class="blob blob-1"></div>
         <div class="blob blob-2"></div>
-        <div class="blob blob-3"></div>
     </div>
 
+    <!-- MAIN GAME CONTAINER -->
     <div class="game-container" id="gameUI">
         <div class="stats-bar">
             <div class="stat-item">
-                <span class="stat-label">Level</span>
-                <span class="stat-value" id="ui-level">1</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">Stage</span>
-                <span class="stat-value" id="ui-stage">1/5</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">Total Koin</span>
-                <span class="stat-value text-gold" id="ui-coins">🪙 0</span>
+                <span class="stat-label">Koin Utama</span>
+                <span class="stat-value text-gold" id="ui-main-coins">🪙 1,000</span>
             </div>
             <div class="stat-item" style="align-items: flex-end;">
+                <span class="stat-label">Koin Game (Run)</span>
+                <span class="stat-value text-emerald" id="ui-game-coins">💰 0</span>
+            </div>
+            <div class="stat-item" style="margin-top: 4px;">
+                <span class="stat-label">Level / Stage</span>
+                <span class="stat-value"><span id="ui-level">1</span> (<span id="ui-stage">1/5</span>)</span>
+            </div>
+            <div class="stat-item" style="align-items: flex-end; margin-top: 4px;">
                 <span class="stat-label">Total Diamond</span>
                 <span class="stat-value text-diamond" id="ui-diamonds">💎 0</span>
             </div>
@@ -360,30 +572,154 @@
 
         <div class="message-area" id="ui-message">
             <div>Selamat Datang di Gambler's Fate</div>
-            <div class="sub-message">Tekan tombol 'Mulai Permainan' di bawah untuk memulai pencarian keberuntungan.</div>
+            <div class="sub-message">Mulai petualangan baru dengan membayar biaya masuk 500 Koin.</div>
         </div>
 
         <div class="boxes-grid" id="boxes-container"></div>
 
         <div class="btn-group">
-            <button class="btn primary" id="start-btn" style="display: block;" onclick="startGameManual()">Mulai Permainan</button>
+            <button class="btn primary" id="start-btn" style="display: block;" onclick="startGameManual()">Mulai Game (🪙500)</button>
             <button class="btn" id="action-btn" onclick="nextAction()">Lanjut</button>
+            <button class="btn danger-action" id="cashout-btn" onclick="executeCashoutRun()">Stop & Cashout 💰</button>
             <button class="btn clue-action" id="clue-btn" disabled onclick="buyAiClue()">🤖 AI Clue (🪙600)</button>
-            <button class="btn secondary" onclick="toggleHistory()">📜 History</button>
+            <button class="btn secondary" onclick="toggleHistory()">📜 History Run</button>
         </div>
 
         <div class="history-panel" id="history-panel">
             <div class="history-title">History Progress Permainan</div>
             <div class="history-list" id="history-list">
-                <div style="color: var(--text-dim); font-style: italic; font-size: 0.8rem;">Belum ada history permainan...</div>
+                <div style="color: var(--text-dim); font-style: italic; font-size: 0.75rem;">Belum ada history permainan...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROFILE MANAGEMENT MODAL -->
+    <div class="modal-overlay" id="profileModal" onclick="if(event.target.id==='profileModal') toggleProfileModal(false)">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" style="color: var(--purple);">👤 PROFIL PEMAIN</div>
+                <div class="close-modal" onclick="toggleProfileModal(false)">&times;</div>
+            </div>
+            <div class="profile-badges">
+                <div class="p-badge-item"><span>Nama Lengkap:</span><strong id="prof-fullname">-</strong></div>
+                <div class="p-badge-item"><span>ID Pemain:</span><strong id="prof-id" style="color: #00f0ff;">-</strong></div>
+                <div class="p-badge-item"><span>Email Terkait:</span><strong id="prof-email">-</strong></div>
+                <div class="p-badge-item"><span>Terintegrasi E-Wallet:</span><strong id="prof-wallet" style="color: var(--gold);">-</strong></div>
+            </div>
+            <button class="btn danger-action" style="display: block; width: 100%; border-radius: 12px;" onclick="logOutSession()">Keluar / Log Out Account</button>
+        </div>
+    </div>
+
+    <!-- DOMPET DIGITAL MODAL INTERFACE -->
+    <div class="modal-overlay" id="walletModal" onclick="if(event.target.id==='walletModal') toggleWalletModal(false)">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">💳 BANK & DOMPET DIGITAL</div>
+                <div class="close-modal" onclick="toggleWalletModal(false)">&times;</div>
+            </div>
+
+            <div class="wallet-balances">
+                <div class="stat-item">
+                    <span class="stat-label">Koin Utama</span>
+                    <span class="stat-value text-gold" id="modal-main-coins">🪙 1,000</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Saldo Tunai</span>
+                    <span class="stat-value text-emerald" id="modal-rupiah">Rp 0</span>
+                </div>
+            </div>
+
+            <div class="wallet-tabs">
+                <button class="tab-btn active" id="tab-topup" onclick="switchWalletTab('topup')">Top-up Koin</button>
+                <button class="tab-btn" id="tab-withdraw" onclick="switchWalletTab('withdraw')">Penarikan (WD)</button>
+                <button class="tab-btn" id="tab-finhistory" onclick="switchWalletTab('finhistory')">History Finansial</button>
+            </div>
+
+            <!-- Content Topup -->
+            <div id="content-topup" class="tab-pane">
+                <div class="shop-grid">
+                    <div class="shop-card" onclick="simulateTopup(1000, 22000)">
+                        <span class="amount">🪙 1,000</span>
+                        <span class="price">Rp 22.000</span>
+                    </div>
+                    <div class="shop-card" onclick="simulateTopup(2500, 50000)">
+                        <span class="amount">🪙 2,500</span>
+                        <span class="price">Rp 50.000</span>
+                    </div>
+                    <div class="shop-card" onclick="simulateTopup(5000, 95000)">
+                        <span class="amount">🪙 5,000</span>
+                        <span class="price">Rp 95.000</span>
+                    </div>
+                    <div class="shop-card" onclick="simulateTopup(10000, 235000)">
+                        <span class="amount">🪙 10,000</span>
+                        <span class="price">Rp 235.000</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Withdraw -->
+            <div id="content-withdraw" class="tab-pane" style="display: none;">
+                <div class="wd-container">
+                    <div class="wd-linked-info">
+                        <strong>📌 Akun Penarikan Terhubung Otomatis:</strong><br>
+                        <span id="wd-linked-detail">Loading data...</span>
+                    </div>
+                    <p style="font-size: 0.75rem; color: var(--text-dim); margin-top: 4px;">Konversi Koin Utama ke Rp simulasi.<br>Rate: 100 Coins = Rp 10</p>
+                    <input type="number" class="wd-input" id="wd-coin-input" placeholder="Jumlah koin..." oninput="calculateWdRate()">
+                    <div class="wd-calc" id="wd-estimation">Estimasi diterima: Rp 0</div>
+                    <button class="btn primary" style="display: block; width: 100%; border-radius: 12px;" onclick="executeWithdrawal()">Tarik Dana</button>
+                </div>
+            </div>
+
+            <!-- Content History Finansial -->
+            <div id="content-finhistory" class="tab-pane" style="display: none;">
+                <div class="fin-history-list" id="fin-history-render">
+                    <div style="color: var(--text-dim); font-size: 0.75rem; font-style: italic; text-align: center; margin-top: 10px;">Belum ada riwayat transaksi.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- UNIFIED AUDIO & SETTING SYSTEM MODAL -->
+    <div class="modal-overlay" id="settingsModal" onclick="if(event.target.id==='settingsModal') toggleSettingsModal(false)">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" style="color: #00f0ff;">🛠️ KONTROL & PENGATURAN GAME</div>
+                <div class="close-modal" onclick="toggleSettingsModal(false)">&times;</div>
+            </div>
+            
+            <div class="setting-toggle-row">
+                <div class="setting-info">
+                    <span class="setting-name">Musik Latar (BGM)</span>
+                    <span class="setting-desc">Nyalakan melodi synth retro ambient</span>
+                </div>
+                <label class="switch-control">
+                    <input type="checkbox" id="toggle-bgm-switch" onchange="switchBgmEngine(this.checked)">
+                    <span class="slider-node"></span>
+                </label>
+            </div>
+
+            <div class="setting-toggle-row">
+                <div class="setting-info">
+                    <span class="setting-name">Efek Suara (SFX)</span>
+                    <span class="setting-desc">Suara feedback saat klik, menang, & kalah</span>
+                </div>
+                <label class="switch-control">
+                    <input type="checkbox" id="toggle-sfx-switch" onchange="switchSfxEngine(this.checked)">
+                    <span class="slider-node"></span>
+                </label>
             </div>
         </div>
     </div>
 
     <script>
-        // Game Settings & Base State (Start from 0)
-        let coins = 0;
+        // Core State Engine (Auto Saved via Auth Account)
+        let currentUser = null;
+        let mainCoins = 1000;      
+        let gameCoins = 0;        
+        let rupiahBalance = 0;    
         let diamonds = 0;
+        
         let level = 1;
         let stage = 1;
         let strikeCount = 0;
@@ -392,47 +728,46 @@
         let isGameOver = false;
         let gameManualStarted = false; 
         let clueUsedInStage = false;
+        
         let historyData = [];
+        let financialHistory = [];
 
         let timeLeft = 15;
         let timerInterval = null;
+        let authIsLoginMode = false; // Registration mode by default
 
-        // Kumpulan Eksklusif Emoji Ekspresi Wajah Saja (Highly Random)
         const mysteryEmojis = [
             '😀', '😁', '😂', '🤣', '😃', '😄', '😅', '😆', '😉', '😊', 
             '😋', '😎', '😍', '😘', '😗', '😙', '😚', '🙂', '🤗', '🤩', 
             '🤔', '🤨', '😐', '😑', '😶', '🙄', '😏', '😣', '😥', '😮', 
-            '🤐', '😯', '😪', '😫', '🥱', '😴', '😌', '😛', '😜', '😝', 
-            '🤤', '😒', '😓', '😔', '😕', '🙃', '🤑', '😲', '🙁', '😖', 
-            '😞', '😟', '😤', '😢', '😭', '🤯', '😬', '😰', '😱', '🥵', 
-            '🥶', '😳', '🤪', '😵', '🥴', '🥺', '🤫', '🤭', '🧐', '🤓'
+            '🤐', '😯', '😪', '😫', '🥱', '😴', '😌', '😛', '😜', '😝'
         ];
         
-        // Random Elegant Palettes
         const elegantBgPalettes = [
             'linear-gradient(135deg, #0f172a, #1e1b4b, #2e1065)', 
             'linear-gradient(135deg, #022c22, #064e3b, #0f172a)', 
             'linear-gradient(135deg, #0f172a, #0c4a6e, #0284c7)', 
-            'linear-gradient(135deg, #1c1917, #451a03, #0c0a09)', 
             'linear-gradient(135deg, #311042, #1f0733, #0a0112)'  
         ];
 
-        // DOM Elements
+        // Core UI Nodes Selection
+        const uiMainCoins = document.getElementById('ui-main-coins');
+        const uiGameCoins = document.getElementById('ui-game-coins');
         const uiLevel = document.getElementById('ui-level');
         const uiStage = document.getElementById('ui-stage');
-        const uiCoins = document.getElementById('ui-coins');
         const uiDiamonds = document.getElementById('ui-diamonds');
         const uiStrike = document.getElementById('ui-strike');
         const uiMessage = document.getElementById('ui-message');
         const uiTimer = document.getElementById('ui-timer');
         const boxesContainer = document.getElementById('boxes-container');
         const actionBtn = document.getElementById('action-btn');
+        const cashoutBtn = document.getElementById('cashout-btn');
         const startBtn = document.getElementById('start-btn');
         const clueBtn = document.getElementById('clue-btn');
         const historyList = document.getElementById('history-list');
         const historyPanel = document.getElementById('history-panel');
 
-        // Split Audio Config
+        // Audio Oscillator Web Synthesizer Engine
         let audioCtx = null;
         let musicInterval = null;
         let isBgmPlaying = false;
@@ -442,45 +777,27 @@
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         }
 
-        // Retro Chill Ambient Music Loop
-        function toggleBgm() {
+        function switchBgmEngine(isActive) {
             initAudio();
-            const btn = document.getElementById('bgm-btn');
-            if (!isBgmPlaying) {
+            if (isActive) {
                 isBgmPlaying = true;
-                btn.innerText = "🎵 BGM: ON";
-                btn.classList.add('active');
-                
                 let step = 0;
-                const chillMelody = [196.00, 220.00, 261.63, 293.66, 329.63, 293.66, 261.63, 220.00]; 
+                const chillMelody = [196.00, 261.63, 293.66, 329.63, 293.66, 220.00]; 
                 musicInterval = setInterval(() => {
                     if(!isBgmPlaying) return;
                     let freq = chillMelody[step % chillMelody.length];
-                    playSynthTone(freq, 'triangle', 0.4, 0.08);
-                    if(step % 4 === 0) {
-                        playSynthTone(freq / 2, 'sine', 0.6, 0.12); 
-                    }
+                    playSynthTone(freq, 'triangle', 0.4, 0.05);
                     step++;
-                }, 550); 
+                }, 600); 
             } else {
                 isBgmPlaying = false;
-                btn.innerText = "🎵 BGM: OFF";
-                btn.classList.remove('active');
                 clearInterval(musicInterval);
             }
         }
 
-        function toggleSfx() {
+        function switchSfxEngine(isActive) {
             initAudio();
-            const btn = document.getElementById('sfx-btn');
-            isSfxEnabled = !isSfxEnabled;
-            if (isSfxEnabled) {
-                btn.innerText = "🔊 SFX: ON";
-                btn.classList.add('active');
-            } else {
-                btn.innerText = "🔊 SFX: OFF";
-                btn.classList.remove('active');
-            }
+            isSfxEnabled = isActive;
         }
 
         function playSynthTone(freq, type, duration, vol) {
@@ -502,60 +819,225 @@
         function triggerSfxSound(type) {
             if (!isSfxEnabled || !audioCtx) return;
             if (type === 'win') {
-                playSynthTone(523.25, 'sine', 0.1, 0.1);
-                setTimeout(() => playSynthTone(659.25, 'sine', 0.1, 0.1), 80);
+                playSynthTone(523.25, 'sine', 0.1, 0.08);
             } else if (type === 'jackpot') {
-                playSynthTone(587.33, 'square', 0.08, 0.08);
-                setTimeout(() => playSynthTone(783.99, 'square', 0.08, 0.08), 70);
-                setTimeout(() => playSynthTone(1046.50, 'square', 0.3, 0.1), 140);
+                playSynthTone(587.33, 'square', 0.08, 0.06);
+                setTimeout(() => playSynthTone(1046.50, 'square', 0.25, 0.08), 100);
             } else if (type === 'lose') {
-                playSynthTone(180, 'sawtooth', 0.3, 0.15);
-                setTimeout(() => playSynthTone(110, 'sawtooth', 0.4, 0.15), 150);
+                playSynthTone(150, 'sawtooth', 0.4, 0.12);
             } else if (type === 'click') {
-                playSynthTone(440, 'triangle', 0.05, 0.08);
+                playSynthTone(440, 'triangle', 0.05, 0.06);
             }
         }
 
+        // Account & Serialization Engine (Auto Saving Features)
+        function toggleAuthMode() {
+            authIsLoginMode = !authIsLoginMode;
+            const titleNode = document.getElementById('authTitle');
+            const submitBtn = document.getElementById('authSubmitBtn');
+            const toggleMessage = document.getElementById('authToggleMessage');
+            
+            const nameField = document.getElementById('group-fullname');
+            const idField = document.getElementById('group-playerid');
+            const walletSection = document.getElementById('signup-wallet-section');
+
+            if(authIsLoginMode) {
+                titleNode.innerText = "MASUK KE GAMBLER'S FATE";
+                submitBtn.innerText = "Masuk Permainan";
+                toggleMessage.innerHTML = "Belum punya akun? <span>Daftar Sekarang</span>";
+                nameField.style.display = "none";
+                idField.style.display = "none";
+                walletSection.style.display = "none";
+                document.getElementById('auth-fullname').removeAttribute('required');
+                document.getElementById('auth-playerid').removeAttribute('required');
+            } else {
+                titleNode.innerText = "PENDAFTARAN AKUN BARU";
+                submitBtn.innerText = "Daftar Akun & Masuk";
+                toggleMessage.innerHTML = "Sudah punya akun? <span>Masuk di sini</span>";
+                nameField.style.display = "block";
+                idField.style.display = "block";
+                walletSection.style.display = "block";
+                document.getElementById('auth-fullname').setAttribute('required', 'required');
+                document.getElementById('auth-playerid').setAttribute('required', 'required');
+            }
+        }
+
+        function handleAuthSubmit(e) {
+            e.preventDefault();
+            triggerSfxSound('click');
+            
+            const email = document.getElementById('auth-email').value.trim();
+            const password = document.getElementById('auth-password').value;
+
+            if (authIsLoginMode) {
+                // Login Flow Simulation
+                let storedUser = localStorage.getItem(`user_${email}`);
+                if (!storedUser) {
+                    alert("❌ Akun tidak ditemukan! Silakan daftar terlebih dahulu.");
+                    return;
+                }
+                let parsed = JSON.parse(storedUser);
+                if (parsed.password !== password) {
+                    alert("❌ Sandi salah!");
+                    return;
+                }
+                currentUser = parsed;
+            } else {
+                // Account Registration Flow Simulation
+                let existing = localStorage.getItem(`user_${email}`);
+                if (existing) {
+                    alert("❌ Email sudah terdaftar! Gunakan menu masuk.");
+                    return;
+                }
+
+                currentUser = {
+                    fullName: document.getElementById('auth-fullname').value.trim(),
+                    playerId: document.getElementById('auth-playerid').value.trim(),
+                    email: email,
+                    password: password,
+                    walletType: document.getElementById('auth-wallet-type').value,
+                    walletName: document.getElementById('auth-wallet-name').value.trim() || "User Name",
+                    walletPhone: document.getElementById('auth-wallet-phone').value.trim() || "08123456789",
+                    mainCoins: 1000,
+                    rupiahBalance: 0,
+                    diamonds: 0,
+                    historyData: [],
+                    financialHistory: []
+                };
+                saveUserData();
+            }
+
+            // Sync States from Saved Cloud Storage Structure
+            loadSavedStates();
+            showMainGameInterface();
+        }
+
+        function saveUserData() {
+            if (!currentUser) return;
+            currentUser.mainCoins = mainCoins;
+            currentUser.rupiahBalance = rupiahBalance;
+            currentUser.diamonds = diamonds;
+            currentUser.historyData = historyData;
+            currentUser.financialHistory = financialHistory;
+            localStorage.setItem(`user_${currentUser.email}`, JSON.stringify(currentUser));
+            localStorage.setItem('last_session_email', currentUser.email);
+        }
+
+        function loadSavedStates() {
+            mainCoins = currentUser.mainCoins;
+            rupiahBalance = currentUser.rupiahBalance;
+            diamonds = currentUser.diamonds;
+            historyData = currentUser.historyData || [];
+            financialHistory = currentUser.financialHistory || [];
+
+            // Update DOM profile context nodes
+            document.getElementById('nav-profile-name').innerText = `👤 ${currentUser.fullName.split(' ')[0].toUpperCase()}`;
+            document.getElementById('prof-fullname').innerText = currentUser.fullName;
+            document.getElementById('prof-id').innerText = currentUser.playerId;
+            document.getElementById('prof-email').innerText = currentUser.email;
+            document.getElementById('prof-wallet').innerText = `${currentUser.walletType} (${currentUser.walletPhone})`;
+            document.getElementById('wd-linked-detail').innerHTML = `${currentUser.walletType}<br>A/N: ${currentUser.walletName}<br>No: ${currentUser.walletPhone}`;
+
+            // Re-render histories if available
+            if (historyData.length > 0) {
+                historyList.innerHTML = historyData.map(item => `
+                    <div class="history-item ${item.typeClass}"><strong>${item.title}</strong><span>${item.res}</span></div>
+                `).join('');
+            }
+        }
+
+        function showMainGameInterface() {
+            document.getElementById('authBox').style.display = 'none';
+            document.getElementById('topControlsUI').style.display = 'grid';
+            document.getElementById('gameUI').style.display = 'flex';
+            initGame();
+        }
+
+        function logOutSession() {
+            triggerSfxSound('click');
+            saveUserData();
+            localStorage.removeItem('last_session_email');
+            currentUser = null;
+            clearInterval(timerInterval);
+
+            // Interface Screen Swapping 
+            document.getElementById('topControlsUI').style.display = 'none';
+            document.getElementById('gameUI').style.display = 'none';
+            toggleProfileModal(false);
+            toggleWalletModal(false);
+            toggleSettingsModal(false);
+            
+            document.getElementById('authBox').style.display = 'block';
+        }
+
+        // Gameplay Mechanism Codebase
         function startGameManual() {
             triggerSfxSound('click');
+            if (mainCoins < 500) {
+                alert("❌ Gagal Memulai: Koin Utama kurang dari 500. Silakan top-up terlebih dahulu.");
+                return;
+            }
+
+            mainCoins -= 500;
+            gameCoins = 0;
+            level = 1;
+            stage = 1;
+            strikeCount = 0;
+            isGameOver = false;
             gameManualStarted = true;
             isClickable = true;
+            
+            uiStrike.className = "strike-badge";
             startBtn.style.display = 'none';
-            uiMessage.innerHTML = `<div>Pilih satu kotak sekarang!</div><div class="sub-message">Fokus... Analisis emojinya, tentukan pilihan teraman.</div>`;
-            updateClueButtonState();
-            startTimer();
+            uiMessage.innerHTML = `<div>Pilih satu kotak!</div><div class="sub-message">Biaya masuk 500 koin terpotong. Kumpulkan koin game sebanyak-banyaknya!</div>`;
+            
+            saveUserData();
+            updateStats();
+            generateStage();
         }
 
         function initGame() {
-            coins = 0;
-            diamonds = 0;
+            gameCoins = 0;
             level = 1;
             stage = 1;
             strikeCount = 0;
             isGameOver = false;
             gameManualStarted = false;
             uiStrike.className = "strike-badge";
-            
             document.body.style.background = elegantBgPalettes[0];
             document.body.classList.remove('jackpot-bg-active');
-
             updateStats();
             generateStage();
         }
 
         function updateStats() {
+            uiMainCoins.innerText = `🪙 ${mainCoins.toLocaleString()}`;
+            uiGameCoins.innerText = `💰 ${gameCoins.toLocaleString()}`;
             uiLevel.innerText = level;
             uiStage.innerText = (stage === 'BONUS') ? 'BONUS' : `${stage}/5`;
-            uiCoins.innerText = `🪙 ${coins}`;
             uiDiamonds.innerText = `💎 ${diamonds}`;
+            
+            document.getElementById('modal-main-coins').innerText = `🪙 ${mainCoins.toLocaleString()}`;
+            document.getElementById('modal-rupiah').innerText = `Rp ${rupiahBalance.toLocaleString()}`;
+
             updateClueButtonState();
+            updateCashoutButtonState();
         }
 
         function updateClueButtonState() {
-            if (coins >= 600 && gameManualStarted && !clueUsedInStage && !isGameOver && isClickable) {
+            let totalAvailable = gameCoins + mainCoins;
+            if (totalAvailable >= 600 && gameManualStarted && !clueUsedInStage && !isGameOver && isClickable) {
                 clueBtn.disabled = false;
             } else {
                 clueBtn.disabled = true;
+            }
+        }
+
+        function updateCashoutButtonState() {
+            if (gameManualStarted && !isClickable && !isGameOver && level >= 3) {
+                cashoutBtn.style.display = 'block';
+            } else {
+                cashoutBtn.style.display = 'none';
             }
         }
 
@@ -563,15 +1045,10 @@
             clearInterval(timerInterval);
             timeLeft = 15;
             uiTimer.style.width = '100%';
-            uiTimer.classList.remove('timer-urgent');
 
             timerInterval = setInterval(() => {
                 timeLeft--;
                 uiTimer.style.width = `${(timeLeft / 15) * 100}%`;
-                if(timeLeft <= 5) {
-                    uiTimer.classList.add('timer-urgent');
-                    if(isSfxEnabled) playSynthTone(290, 'triangle', 0.03, 0.06);
-                }
                 if(timeLeft <= 0) {
                     clearInterval(timerInterval);
                     handleTimeout();
@@ -582,17 +1059,20 @@
         function handleTimeout() {
             isClickable = false;
             isGameOver = true;
-            strikeCount = 0;
-            uiStrike.className = "strike-badge";
             triggerSfxSound('lose');
 
+            let lostCoins = gameCoins;
+            gameCoins = 0;
+            strikeCount = 0;
+            uiStrike.className = "strike-badge";
             document.body.style.background = 'linear-gradient(135deg, #2d0510, #0a0003, #000000)';
-            document.body.classList.remove('jackpot-bg-active');
 
-            uiMessage.innerHTML = `<div style="color: var(--red);">WAKTU HABIS! Terlalu lama menganalisis resiko.</div>`;
-            logHistory(level, stage, "Waktu Habis (Kalah)", false, true);
+            uiMessage.innerHTML = `<div style="color: var(--red);">WAKTU HABIS! 💰 ${lostCoins} Koin Game Hangus!</div>`;
+            logHistory(level, stage, "Waktu Habis", false);
+            saveUserData();
+            updateStats();
             revealAllBoxes(-1);
-            showButton("Ulang Dari Awal", false);
+            showButton("Mulai Permainan Baru", false);
         }
 
         function generateStage() {
@@ -600,38 +1080,35 @@
             document.body.classList.remove('jackpot-bg-active');
 
             if (!isGameOver && gameManualStarted) {
-                applyLevelBackground();
+                let paletteIndex = (level - 1) % elegantBgPalettes.length;
+                document.body.style.background = elegantBgPalettes[paletteIndex];
             }
 
             boxesContainer.innerHTML = '';
             actionBtn.style.display = 'none';
+            cashoutBtn.style.display = 'none';
 
-            let titleMsg = `Pilih kotak penyamaran!`;
+            let titleMsg = `Pilih kotak misteri!`;
             let subMsg = `Pilih kotak secara bijak, awasi jebakan Zonk.`;
             let numZonk = 0;
             let isBonus = (stage === 'BONUS');
 
-            // Logika Distribusi Zonk Fleksibel
             if (isBonus) {
                 titleMsg = `✨ STAGE BONUS ✨`;
-                subMsg = `Bebas dari resiko Zonk, kumpulkan keuntungan koin!`;
-                numZonk = 0;
+                subMsg = `Bebas resiko Zonk, kumpulkan semua keuntungan!`;
             } else if (level === 1) {
+                numZonk = (stage === 1) ? 0 : 1;
                 if (stage === 1) {
-                    titleMsg = `Langkah Pertama (Aman)`;
-                    subMsg = `Tahap awal pengumpulan dana. Seluruh kotak dijamin berisi koin!`;
-                    numZonk = 0; // Level 1 Stage 1 selalu aman
-                } else {
-                    numZonk = 1; // Level 1 Stage 2 sampai 5 pasti berisi tepat 1 Zonk
+                    titleMsg = `Tahap Awal (Aman)`;
+                    subMsg = `Seluruh kotak dijamin berisi koin aman.`;
                 }
             } else {
-                // Level 2 ke atas: Acak dinamis antara 1 Zonk atau maksimal 2 Zonk
                 numZonk = Math.random() < 0.5 ? 1 : 2;
             }
 
             if (!gameManualStarted) {
                 titleMsg = `Selamat Datang di Gambler's Fate`;
-                subMsg = `Tekan tombol 'Mulai Permainan' di bawah untuk memulai pencarian keberuntungan.`;
+                subMsg = `Mulai permainan baru dengan biaya masuk 500 Koin.`;
                 startBtn.style.display = 'block';
                 isClickable = false;
             } else {
@@ -642,31 +1119,27 @@
             uiMessage.innerHTML = `<div>${titleMsg}</div><div class="sub-message">${subMsg}</div>`;
             currentBoxes = [];
 
-            // Memasukkan Zonk ke Grid
             for(let i = 0; i < numZonk; i++) {
                 currentBoxes.push({ type: 'zonk', value: 0 });
             }
 
-            // Memasukkan Drop Hadiah (Koin Beragam Ukuran & Diamond)
             let remaining = 4 - numZonk;
             for(let i = 0; i < remaining; i++) {
-                let chance = Math.random();
-                
-                if (level >= 3 && Math.random() < 0.3) {
+                if (level >= 3 && Math.random() < 0.25) {
                     let dVal = Math.floor((Math.random() * 3 + 1) * (level - 1));
                     currentBoxes.push({ type: 'diamond', value: dVal });
                     continue;
                 }
 
+                let chance = Math.random();
                 if (isBonus) {
                     currentBoxes.push(chance < 0.4 ? 
                         { type: 'high', value: Math.floor((Math.random() * 250 + 200) * level) } : 
                         { type: 'med', value: Math.floor((Math.random() * 100 + 80) * level) }
                     );
                 } else {
-                    // Setiap stage normal kini memiliki peluang memunculkan Koin Besar secara acak
                     if (chance < 0.25) {
-                        currentBoxes.push({ type: 'high', value: Math.floor((Math.random() * 200 + 160) * level) });
+                        currentBoxes.push({ type: 'high', value: Math.floor((Math.random() * 180 + 150) * level) });
                     } else if (chance < 0.65) {
                         currentBoxes.push({ type: 'med', value: Math.floor((Math.random() * 60 + 40) * level) });
                     } else {
@@ -675,7 +1148,6 @@
                 }
             }
 
-            // Acak Posisi Kotak & Peta Emoji Acak Baru
             currentBoxes.sort(() => Math.random() - 0.5);
             let currentEmojis = [...mysteryEmojis].sort(() => Math.random() - 0.5);
 
@@ -693,51 +1165,40 @@
 
             if (gameManualStarted) {
                 startTimer();
-                updateClueButtonState();
+                updateStats();
             }
         }
 
-        // AI Clue System (45% Akurasi Penunjuk)
         function buyAiClue() {
-            if (coins < 600 || clueUsedInStage || !isClickable || isGameOver) return;
+            let totalAvailable = gameCoins + mainCoins;
+            if (totalAvailable < 600 || clueUsedInStage || !isClickable || isGameOver) return;
             
             triggerSfxSound('click');
-            coins -= 600;
+            if (gameCoins >= 600) {
+                gameCoins -= 600;
+            } else {
+                let remainder = 600 - gameCoins;
+                gameCoins = 0;
+                mainCoins -= remainder;
+            }
+            
             clueUsedInStage = true;
             updateStats();
 
             let targetIndex = 0;
             let safeIndexes = [];
-            let zonkIndexes = [];
-
             currentBoxes.forEach((box, idx) => {
-                if (box.type === 'zonk') zonkIndexes.push(idx);
-                else safeIndexes.push(idx);
+                if (box.type !== 'zonk') safeIndexes.push(idx);
             });
 
-            if (Math.random() < 0.45) {
-                if (safeIndexes.length > 0) {
-                    targetIndex = safeIndexes[Math.floor(Math.random() * safeIndexes.length)];
-                } else {
-                    targetIndex = Math.floor(Math.random() * currentBoxes.length);
-                }
+            if (safeIndexes.length > 0 && Math.random() < 0.6) {
+                targetIndex = safeIndexes[Math.floor(Math.random() * safeIndexes.length)];
             } else {
-                if (zonkIndexes.length > 0) {
-                    targetIndex = zonkIndexes[Math.floor(Math.random() * zonkIndexes.length)];
-                } else {
-                    targetIndex = safeIndexes[Math.floor(Math.random() * safeIndexes.length)];
-                }
+                targetIndex = Math.floor(Math.random() * currentBoxes.length);
             }
 
             const targetBoxEl = document.getElementById(`box-node-${targetIndex}`);
-            if (targetBoxEl) {
-                targetBoxEl.classList.add('clue-active');
-            }
-        }
-
-        function applyLevelBackground() {
-            let paletteIndex = (level - 1) % elegantBgPalettes.length;
-            document.body.style.background = elegantBgPalettes[paletteIndex];
+            if (targetBoxEl) targetBoxEl.classList.add('clue-active');
         }
 
         function handleBoxClick(selectedIndex, boxEl) {
@@ -750,37 +1211,38 @@
             boxEl.classList.add('opened');
 
             if (boxData.type === 'zonk') {
-                strikeCount = 0;
-                uiStrike.className = "strike-badge";
                 triggerSfxSound('lose');
                 boxEl.classList.add('zonk');
                 contentEl.innerHTML = `☠️<div class="val-text">ZONK</div>`;
                 
-                document.body.style.background = 'linear-gradient(135deg, #3b020c, #0a0003, #000000)';
+                let lostCoins = gameCoins;
+                gameCoins = 0;
+                strikeCount = 0;
+                uiStrike.className = "strike-badge";
+                document.body.style.background = 'linear-gradient(135deg, #3b020c, #000000)';
                 isGameOver = true;
 
-                uiMessage.innerHTML = `<div style="color: var(--red);">ZONK! Intuisi Anda terjebak jebakan.</div>`;
-                logHistory(level, stage, "☠️ Masuk Zonk", false);
+                uiMessage.innerHTML = `<div style="color: var(--red);">ZONK! Sesi berakhir, 💰 ${lostCoins} koin game hangus!</div>`;
+                logHistory(level, stage, "☠️ Zonk", false);
                 revealAllBoxes(selectedIndex);
-                showButton("Ulang Dari Awal", false);
+                saveUserData();
+                showButton("Mulai Baru (🪙500)", false);
             } else {
                 let rewardText = "";
-                let isJackpot = false;
-
                 if (boxData.type === 'diamond') {
                     diamonds += boxData.value;
                     boxEl.classList.add('win-diamond');
                     contentEl.innerHTML = `💎<div class="val-text">+${boxData.value}</div>`;
                     rewardText = `+${boxData.value} Diamond`;
                     triggerSfxSound('jackpot');
-                    isJackpot = true; 
                 } else {
-                    coins += boxData.value;
+                    gameCoins += boxData.value;
                     rewardText = `+${boxData.value} Koin`;
                     if (boxData.type === 'high') {
                         boxEl.classList.add('win-big');
                         triggerSfxSound('jackpot');
-                        isJackpot = true;
+                        document.body.style.background = 'linear-gradient(135deg, #3b2300, #15003b)';
+                        document.body.classList.add('jackpot-bg-active');
                     } else {
                         boxEl.classList.add(boxData.type === 'med' ? 'win-med' : 'win-low');
                         triggerSfxSound('win');
@@ -788,28 +1250,37 @@
                     contentEl.innerHTML = `🪙<div class="val-text">+${boxData.value}</div>`;
                 }
 
-                if (isJackpot) {
-                    document.body.style.background = 'linear-gradient(135deg, #3b2300, #5c0263, #15003b)';
-                    document.body.classList.add('jackpot-bg-active');
-                    uiMessage.innerHTML = `<div style="color: var(--gold); text-shadow: 0 0 10px rgba(255,183,3,0.5)">KILAU KEBERUNTUNGAN! ${rewardText}!</div>`;
-                } else {
-                    uiMessage.innerHTML = `<div style="color: #00f0ff;">Berhasil Memilih! (${rewardText})</div>`;
-                }
-
                 if (stage !== 'BONUS' && !(level === 1 && stage === 1)) {
                     strikeCount++;
                     if (strikeCount >= 2) {
                         uiStrike.innerText = `🔥 ${strikeCount}x WIN STRIKE`;
-                        uiStrike.className = "strike-badge interstate strike-pop";
+                        uiStrike.className = "strike-badge strike-pop";
                     }
                 }
 
+                uiMessage.innerHTML = `<div style="color: #00f0ff;">Berhasil Memilih! (${rewardText})</div>`;
                 logHistory(level, stage, rewardText, stage === 'BONUS');
-                updateStats();
                 revealAllBoxes(selectedIndex);
-                showButton(stage === 'BONUS' ? "Selesaikan Bonus" : "Lanjutkan", true);
+                saveUserData();
+                showButton(stage === 'BONUS' ? "Selesaikan Bonus" : "Lanjutkan Step", true);
             }
-            updateClueButtonState();
+            updateStats();
+        }
+
+        function executeCashoutRun() {
+            if (level < 3) {
+                alert("🔒 Fitur Terkunci: Minimal pencapaian harus Level 3 untuk melakukan Cashout!");
+                return;
+            }
+            triggerSfxSound('jackpot');
+            let cashedAmount = gameCoins;
+            mainCoins += gameCoins;
+            gameCoins = 0;
+            
+            alert(`💰 CASHOUT BERHASIL!\nTotal 🪙 ${cashedAmount.toLocaleString()} Koin dikirim ke Koin Utama.`);
+            logHistory(level, stage, `Cashout: +${cashedAmount}`, false);
+            saveUserData();
+            initGame();
         }
 
         function revealAllBoxes(selectedIndex) {
@@ -819,13 +1290,9 @@
                     el.classList.add('opened', 'unpicked');
                     const cEl = document.getElementById(`content-${index}`);
                     const bData = currentBoxes[index];
-                    if (bData.type === 'zonk') {
-                        cEl.innerHTML = `☠️`;
-                    } else if (bData.type === 'diamond') {
-                        cEl.innerHTML = `💎<div class="val-text" style="font-size:0.75rem">+${bData.value}</div>`;
-                    } else {
-                        cEl.innerHTML = `🪙<div class="val-text" style="font-size:0.75rem">+${bData.value}</div>`;
-                    }
+                    if (bData.type === 'zonk') cEl.innerHTML = `☠️`;
+                    else if (bData.type === 'diamond') cEl.innerHTML = `💎<div class="val-text" style="font-size:0.7rem">+${bData.value}</div>`;
+                    else cEl.innerHTML = `🪙<div class="val-text" style="font-size:0.7rem">+${bData.value}</div>`;
                 }
             });
         }
@@ -839,65 +1306,127 @@
         function nextAction() {
             triggerSfxSound('click');
             if (isGameOver) {
-                initGame();
+                startGameManual();
             } else {
                 if (stage === 'BONUS') {
                     level++;
                     stage = 1;
-                    
                     let coinFee = level * 150;
-                    let diamondFee = 0;
+                    let diamondFee = level >= 5 ? (level - 4) * 5 : 0;
 
-                    if (level >= 5) {
-                        coinFee = level * 210;
-                        diamondFee = (level - 4) * 5;
-                    }
-
-                    if (coins < coinFee || diamonds < diamondFee) {
-                        uiMessage.innerHTML = `<div style="color: var(--red);">ELIMINASI! Dana tidak mencukupi untuk tiket masuk Level ${level} (Butuh 🪙${coinFee} & 💎${diamondFee}).</div>`;
+                    if (mainCoins < coinFee || diamonds < diamondFee) {
+                        if (level - 1 >= 3) {
+                            mainCoins += gameCoins;
+                            alert(`🚨 Gagal Naik Level karena tiket kurang! Koin Game sebesar 💰 ${gameCoins} berhasil dicashout otomatis.`);
+                        } else {
+                            alert(`🚨 Gagal Naik Level karena tiket kurang! Koin game hangus.`);
+                        }
+                        gameCoins = 0;
                         isGameOver = true;
                         boxesContainer.innerHTML = '';
                         uiStrike.className = "strike-badge";
-                        document.body.style.background = 'linear-gradient(135deg, #1f0107, #000000, #0a0005)';
-                        showButton("Mulai Baru", false);
+                        showButton("Main Baru (🪙500)", false);
+                        saveUserData();
+                        updateStats();
                         return;
                     } else {
-                        coins -= coinFee;
+                        mainCoins -= coinFee;
                         diamonds -= diamondFee;
-                        alert(`🎟️ MEMASUKI LEVEL ${level}\nBiaya Progresif Terpotong:\n🪙 -${coinFee} Koin\n💎 -${diamondFee} Diamond`);
                     }
                 } else {
                     stage++;
-                    if (stage > 5) {
-                        stage = 'BONUS';
-                    }
+                    if (stage > 5) stage = 'BONUS';
                 }
+                saveUserData();
                 updateStats();
                 generateStage();
             }
         }
 
-        function logHistory(lvl, stg, result, isBonusBar = false, isTimeout = false) {
-            let stageName = isBonusBar ? "Stage Bonus" : `Stg ${stg}`;
-            let statusClass = "win";
-            if (result.includes("Zonk") || isTimeout) statusClass = "lose";
-            if (isBonusBar) statusClass = "bonus";
-
-            historyData.unshift({
-                title: `Lvl ${lvl} - ${stageName}`,
-                res: result,
-                typeClass: statusClass
-            });
-            renderHistory();
+        // Modals Toggling & Navigation Handlers
+        function toggleWalletModal(show) {
+            if(show) triggerSfxSound('click');
+            document.getElementById('walletModal').style.display = show ? 'flex' : 'none';
+            if(show) updateStats();
         }
 
-        function renderHistory() {
-            if (historyData.length === 0) return;
-            historyList.innerHTML = historyData.map(item => `
-                <div class="history-item ${item.typeClass}">
-                    <span><strong>${item.title}</strong></span>
-                    <span>${item.res}</span>
+        function toggleProfileModal(show) {
+            if(show) triggerSfxSound('click');
+            document.getElementById('profileModal').style.display = show ? 'flex' : 'none';
+        }
+
+        function toggleSettingsModal(show) {
+            if(show) triggerSfxSound('click');
+            document.getElementById('settingsModal').style.display = show ? 'flex' : 'none';
+        }
+
+        function switchWalletTab(tabName) {
+            triggerSfxSound('click');
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.style.display = 'none');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            document.getElementById(`content-${tabName}`).style.display = 'block';
+            if(tabName === 'finhistory') renderFinancialHistory();
+        }
+
+        function simulateTopup(coinAmount, priceRupiah) {
+            mainCoins += coinAmount;
+            triggerSfxSound('jackpot');
+            financialHistory.unshift({ desc: `Top-up Koin (+🪙${coinAmount})`, cost: `-Rp ${priceRupiah.toLocaleString()}`, date: new Date().toLocaleTimeString() });
+            alert(`✅ TOP-UP BERHASIL!\nDitambahkan: +🪙 ${coinAmount.toLocaleString()} Koin Utama`);
+            saveUserData();
+            updateStats();
+        }
+
+        function calculateWdRate() {
+            let val = parseInt(document.getElementById('wd-coin-input').value) || 0;
+            document.getElementById('wd-estimation').innerText = `Estimasi diterima: Rp ${Math.floor(val * 0.1).toLocaleString()}`;
+        }
+
+        function executeWithdrawal() {
+            let inputNode = document.getElementById('wd-coin-input');
+            let coinToWd = parseInt(inputNode.value) || 0;
+
+            if (coinToWd <= 0 || coinToWd > mainCoins) {
+                alert("❌ Jumlah penarikan tidak valid atau saldo koin utama kurang!");
+                return;
+            }
+
+            mainCoins -= coinToWd;
+            let convertedRp = Math.floor(coinToWd * 0.1);
+            rupiahBalance += convertedRp;
+            triggerSfxSound('jackpot');
+
+            financialHistory.unshift({ desc: `WD Otomatis via ${currentUser.walletType}`, cost: `+Rp ${convertedRp.toLocaleString()}`, date: new Date().toLocaleTimeString() });
+            alert(`✅ PENARIKAN BERHASIL!\nDana sebesar Rp ${convertedRp.toLocaleString()} sedang dikirimkan ke nomor ${currentUser.walletPhone} (${currentUser.walletType} A/N ${currentUser.walletName})`);
+            inputNode.value = "";
+            calculateWdRate();
+            saveUserData();
+            updateStats();
+        }
+
+        function renderFinancialHistory() {
+            const container = document.getElementById('fin-history-render');
+            if (financialHistory.length === 0) {
+                container.innerHTML = `<div style="color: var(--text-dim); font-size: 0.75rem; font-style: italic; text-align: center; margin-top: 10px;">Belum ada riwayat transaksi.</div>`;
+                return;
+            }
+            container.innerHTML = financialHistory.map(item => `
+                <div class="fin-item">
+                    <div><strong>${item.desc}</strong><div style="font-size:0.65rem; color: var(--text-dim);">${item.date}</div></div>
+                    <div style="font-weight:900; color: #00f0ff;">${item.cost}</div>
                 </div>
+            `).join('');
+        }
+
+        function logHistory(lvl, stg, result, isBonusBar = false) {
+            let stageName = isBonusBar ? "Bonus" : `Stg ${stg}`;
+            let statusClass = result.includes("Zonk") || result.includes("Habis") ? "lose" : (isBonusBar ? "bonus" : "win");
+            historyData.unshift({ title: `Lvl ${lvl} - ${stageName}`, res: result, typeClass: statusClass });
+            if (historyData.length > 20) historyData.pop();
+            
+            historyList.innerHTML = historyData.map(item => `
+                <div class="history-item ${item.typeClass}"><strong>${item.title}</strong><span>${item.res}</span></div>
             `).join('');
         }
 
@@ -906,8 +1435,20 @@
             historyPanel.classList.toggle('open');
         }
 
+        // Initialization Pipeline Window Watcher
         window.onload = () => {
-            initGame();
+            let lastEmail = localStorage.getItem('last_session_email');
+            if (lastEmail) {
+                let savedUser = localStorage.getItem(`user_${lastEmail}`);
+                if (savedUser) {
+                    currentUser = JSON.parse(savedUser);
+                    loadSavedStates();
+                    showMainGameInterface();
+                    return;
+                }
+            }
+            // If no previous active session detected, boot registration panel
+            document.getElementById('authBox').style.display = 'block';
         };
     </script>
 </body>
